@@ -4,13 +4,18 @@ USE_SPHINX_GALLERY = False
 
 
 def centered_dot(turtle, diameter):
+    speed = turtle.speed()
+    turtle.speed(0)
     pensize = turtle.pensize()
     turtle.pensize(diameter)
     turtle.goto(turtle.position())
     turtle.pensize(pensize)
+    turtle.speed(speed)
 
 
 def centered_cross(turtle, length):
+    speed = turtle.speed()
+    turtle.speed(0)
     r = length / 2
     x, y = turtle.position()
     turtle.goto(x + r, y + r)
@@ -19,9 +24,12 @@ def centered_cross(turtle, length):
     turtle.goto(x + r, y - r)
     turtle.goto(x - r, y + r)
     turtle.goto(x, y)
+    turtle.speed(speed)
 
 
 def centered_line(turtle, length):
+    speed = turtle.speed()
+    turtle.speed(0)
     r = length / 2
     tr = turtle._tracer()
     dl = turtle._delay()
@@ -38,6 +46,7 @@ def centered_line(turtle, length):
     turtle.left(90)
     turtle.pendown()
     turtle._tracer(tr, dl)
+    turtle.speed(speed)
 
 
 def _finish_visualise(done, bye):
@@ -55,7 +64,7 @@ def _finish_visualise(done, bye):
             pass
 
 
-def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, done=True, bye=True):
+def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, speed=6, trace_jump=False, done=True, bye=True):
     """Use the builtin ``turtle`` library to visualise an embroidery pattern.
 
     Parameters
@@ -71,6 +80,10 @@ def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, done
         Canvas height
     scale : int
         Factor the embroidery length's are scaled by.
+    speed : int
+        Speed that the turtle object moves at.
+    trace_jump : bool
+        If True, then draw a grey line connecting the origin and destination of jumps.
     done : bool
         If True, then ``turtle.done()`` will be called after drawing.
     bye : bool
@@ -92,7 +105,8 @@ def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, done
             Turtle._pen = Turtle()
         turtle = Turtle._pen
 
-        turtle.speed("fastest")
+    turtle.speed(speed)
+
     screen = Screen()
     screen.setup(width, height)
 
@@ -109,32 +123,38 @@ def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, done
         x = scale * x
         y = scale * y
         if command == JUMP:
-            turtle.color("red")
+            # turtle.color("red")
+            turtle.color(0.8, 0.8, 0.8)
+            if not trace_jump: turtle.penup()
             turtle.goto(x, y)
+            turtle.pendown()
 
-            speed = turtle.speed()
-            turtle.speed("fastest")
-            centered_dot(turtle, 25 * scale)
-            turtle.speed(speed)
+            centered_dot(turtle, 10 * scale)
         elif command == TRIM:
             turtle.penup()
             turtle.goto(x, y)
             turtle.pendown()
 
-            turtle.color("black")
-            speed = turtle.speed()
-            turtle.speed("fastest")
-            centered_cross(turtle, 25 * scale)
-            turtle.speed(speed)
+            # turtle.color("black")
+            turtle.color(0.8, 0.8, 0.8)
+            centered_cross(turtle, 10 * scale)
         elif command == STITCH:
             turtle.setheading(turtle.towards(x, y))
-            turtle.pendown()
             turtle.color("blue")
-            turtle.goto(x, y)
-            speed = turtle.speed()
-            turtle.speed("fastest")
-            centered_line(turtle, 10 * scale)
-            turtle.speed(speed)
+
+            # 12.5% 75%  12.5%
+            # blank line blank
+            xcur, ycur = turtle.position()
+            d = ((xcur-x)**2 + (ycur-y)**2)**0.5 # TODO: find a way to avoid fp errors here
+
+            turtle.penup()
+            turtle.forward(d/8)
+            turtle.pendown()
+            turtle.forward(d/4*3)
+            turtle.penup()
+            turtle.forward(d/8)
+            turtle.pendown()
+
         else:
             raise_error = True
             break
