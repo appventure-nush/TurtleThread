@@ -1,8 +1,9 @@
-"""This module contains code from the builtin turtle.py, but without importing TKinter.
+"""This module contains code from the builtin turtle.py, but without importing
+TKinter.
 
-We need to do this since we want TurtleThread to work on platforms with Python compiled
-without TKinter support. However, we also want to base our Turtle class on the
-TNavigator class in the builtin turtle.py.
+We need to do this since we want TurtleThread to work on platforms with Python
+compiled without TKinter support. However, we also want to base our Turtle
+class on the TNavigator class in the builtin turtle.py.
 """
 
 # Copyright notice from the builtin turtle.py:
@@ -90,7 +91,11 @@ class TNavigator(object):
     Implements methods for turtle movement.
     """
 
-    START_ORIENTATION = {"standard": Vec2D(1.0, 0.0), "world": Vec2D(1.0, 0.0), "logo": Vec2D(0.0, 1.0)}
+    START_ORIENTATION = {
+        "standard": Vec2D(1.0, 0.0),
+        "world": Vec2D(1.0, 0.0),
+        "logo": Vec2D(0.0, 1.0),
+    }
     DEFAULT_MODE = "standard"
     DEFAULT_ANGLEOFFSET = 0
     DEFAULT_ANGLEORIENT = 1
@@ -464,7 +469,9 @@ class TNavigator(object):
         x, y = pos - self._position
         result = round(math.degrees(math.atan2(y, x)), 10) % 360.0
         result /= self._degreesPerAU
-        return (self._angleOffset + self._angleOrient * result) % self._fullcircle
+        return (
+            self._angleOffset + self._angleOrient * result
+        ) % self._fullcircle
 
     def heading(self):
         """Return the turtle's current heading.
@@ -479,7 +486,9 @@ class TNavigator(object):
         x, y = self._orient
         result = round(math.degrees(math.atan2(y, x)), 10) % 360.0
         result /= self._degreesPerAU
-        return (self._angleOffset + self._angleOrient * result) % self._fullcircle
+        return (
+            self._angleOffset + self._angleOrient * result
+        ) % self._fullcircle
 
     def setheading(self, to_angle):
         """Set the orientation of the turtle to to_angle.
@@ -550,9 +559,9 @@ class TNavigator(object):
             steps = 1 + int(min(11 + abs(radius) / 6.0, 59.0) * frac)
         w = 1.0 * extent / steps
         w2 = 0.5 * w
-        l = 2.0 * radius * math.sin(math.radians(w2) * self._degreesPerAU)
+        ln = 2.0 * radius * math.sin(math.radians(w2) * self._degreesPerAU)
         if radius < 0:
-            l, w, w2 = -l, -w, -w2
+            ln, w, w2 = -ln, -w, -w2
         tr = self._tracer()
         dl = self._delay()
         if speed == 0:
@@ -562,7 +571,7 @@ class TNavigator(object):
         self._rotate(w2)
         for i in range(steps):
             self.speed(speed)
-            self._go(l)
+            self._go(ln)
             self.speed(0)
             self._rotate(w)
         self._rotate(-w2)
@@ -572,7 +581,7 @@ class TNavigator(object):
         if self.undobuffer:
             self.undobuffer.cumulate = False
 
-    ## three dummy methods to be implemented by child class:
+    # three dummy methods to be implemented by child class:
 
     def speed(self, s=0):
         """dummy method - to be overwritten by child class"""

@@ -45,7 +45,11 @@ def get_pattern_info(pattern):
         if y > info["y_max"]:
             info["y_max"] = y
 
-        if prev_command is None or command != prev_command or command != STITCH:
+        if (
+            prev_command is None
+            or command != prev_command
+            or command != STITCH
+        ):
             prev_x, prev_y, prev_command = x, y, command
             continue
 
@@ -83,7 +87,19 @@ def show_info(pattern, scale=1):
     print(f"{'Width [mm]':>25} | {width/10:{num_digits}.0f}")
     print(f"{'Height [mm]':>25} | {height/10:{num_digits}.0f}")
     print(f"{'Min distance between':>25} |")
-    print(f"{'subsequent stitches [mm]':>25} | {closest_stitches:{num_digits}.0f}")
-    print(f"{'Number of stitches':>25} | {pattern_info['num_stitches']:{num_digits}.0f}")
-    print(f"{'Number of jumps':>25} | {pattern_info['num_jumps']:{num_digits}.0f}")
-    print(f"{'Number of trims':>25} | {pattern_info['num_trims']:{num_digits}.0f}")
+    print(
+        f"{'subsequent stitches [mm]':>25} | \
+        {closest_stitches:{num_digits}.0f}"
+    )
+    print(
+        f"{'Number of stitches':>25} | \
+        {pattern_info['num_stitches']:{num_digits}.0f}"
+    )
+    print(
+        f"{'Number of jumps':>25} | \
+        {pattern_info['num_jumps']:{num_digits}.0f}"
+    )
+    print(
+        f"{'Number of trims':>25} | \
+        {pattern_info['num_trims']:{num_digits}.0f}"
+    )

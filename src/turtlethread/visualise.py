@@ -55,7 +55,9 @@ def _finish_visualise(done, bye):
             pass
 
 
-def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, done=True, bye=True):
+def visualise_pattern(
+    pattern, turtle=None, width=800, height=800, scale=1, done=True, bye=True
+):
     """Use the builtin ``turtle`` library to visualise an embroidery pattern.
 
     Parameters
