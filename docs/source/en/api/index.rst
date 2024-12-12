@@ -9,6 +9,7 @@ Here is the technical documentation for TurtleThread.
 
     turtle
     stitch_groups
+    fills
     visualisation
     utils
 
