@@ -59,6 +59,7 @@ def move_turtle_to(te:turtlethread.Turtle, x, y):
 
     #print(prev_end_pos) 
     #print(prev_turtle_pos) 
+    #print(te.position())
     #print(x, y)
 
     #debug.append((x, y)) # for debugging purposes 
@@ -73,17 +74,24 @@ def move_turtle_to(te:turtlethread.Turtle, x, y):
     if diff_stitch_type: 
         #print("FROM {} TO {}".format(prev_stitch, type(new_stitch)))
         if isinstance(new_stitch, turtlethread.stitches.JumpStitch): 
-            #print("DRAWING {} FROM {} TO {}".format(prev_stitch, prev_turtle_pos, prev_end_pos)) 
-
-            with te.use_stitch_group(prev_stitch): 
-                # then finish this up first before the jump stitch 
-                pex, pey = prev_end_pos 
-                if flip_y: 
-                    te.goto(pex, -pey)
-                else: 
-                    te.goto(pex, pey) 
             
-            prev_turtle_pos = prev_end_pos
+            prevx, prevy = te.position() 
+            if flip_y: 
+                prevy = -prevy # convert back to "normal" unflipped y 
+            pex, pey = prev_end_pos 
+            if abs(prevx - pex)<1e-7 and abs(prevy - pey)<1e-7: 
+                pass 
+            else: 
+                #print("DRAWING {} FROM {} TO {}".format(prev_stitch, prev_turtle_pos, prev_end_pos)) 
+                with te.use_stitch_group(prev_stitch): 
+                    # then finish this up first before the jump stitch 
+                    pex, pey = prev_end_pos 
+                    if flip_y: 
+                        te.goto(pex, -pey)
+                    else: 
+                        te.goto(pex, pey) 
+                
+                prev_turtle_pos = prev_end_pos
             prev_stitch = new_stitch 
 
 
@@ -94,9 +102,7 @@ def move_turtle_to(te:turtlethread.Turtle, x, y):
             te.goto(x, -y) 
         else: 
             te.goto(x, y) 
-        prev_turtle_pos = list( te.position() ) 
-        if flip_y: 
-            prev_turtle_pos[1] = -prev_turtle_pos[1] 
+        prev_turtle_pos = [x, y] 
         prev_stitch = new_stitch 
         prev_end_pos = x, y 
         return 

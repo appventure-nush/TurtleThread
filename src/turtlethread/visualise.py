@@ -210,7 +210,7 @@ def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, spee
             # turtle.color("red")
             turtle.color(0.8, 0.8, 0.8)
             if not trace_jump: turtle.penup()
-            turtle.goto(x, y)
+            turtle.goto(x, -y)
             turtle.pendown()
 
             centered_dot(turtle, 10 * scale)
@@ -223,14 +223,14 @@ def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, spee
             turtle.color(0.8, 0.8, 0.8)
             centered_cross(turtle, 10 * scale)
         elif command == STITCH:
-            turtle.setheading(turtle.towards(x, y))
+            turtle.setheading(turtle.towards(x, -y))
             turtle.color("blue")
 
             #  20%  60%   20%
             # blank line blank
             # if stitch is long, limit blank part
             xcur, ycur = turtle.position()
-            d = ((xcur - x) ** 2 + (ycur - y) ** 2) ** 0.5  # maybe find a way to avoid fp errors here? prob unnecessary
+            d = ((xcur - x) ** 2 + (ycur - (-y)) ** 2) ** 0.5  # maybe find a way to avoid fp errors here? prob unnecessary
             blank = min(d/5, 5)
             solid = d - 2*blank
 

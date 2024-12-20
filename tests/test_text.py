@@ -15,7 +15,7 @@ Pte. Ltd. '''
 
 if __name__ == '__main__': 
     print("STARTED")
-    with turtlethread.LetterDrawer(turtlethread.Turtle(scale=0.75)) as ld: 
+    with turtlethread.LetterDrawer(turtlethread.Turtle(scale=0.4)) as ld: 
 
         with ld.turtle.jump_stitch(): 
             ld.turtle.goto(-350, 300)
@@ -39,12 +39,13 @@ if __name__ == '__main__':
         ld.draw_letter_gap(120) 
 
         
-        ld.draw_string('Arial', "SAMPLE", 120, fills=True, outlines=True, letter_gaps=[0.02, 0.03, 0.04, 0.05, 0.06, 0.07]) 
+        ld.draw_string('Arial', "SAMPLE", 120, fills=True, outlines=True, )#letter_gaps=[0.02, 0.03, 0.04, 0.05, 0.06, 0.07]) 
         
         with ld.turtle.jump_stitch(): 
             ld.turtle.goto(-350, 300)
         
-        ld.draw_string('Arial', "\n\nabcqz", 120, fills=False, outlines=True, flip_y=True)
+        ld.draw_string('Arial', "\n\na", 120, fills=False, outlines=True, flip_y=True)
+        print("DONE DRAWING TEXT")
 
         # flip y axis 
         '''from turtlethread.base_turtle import Vec2D 
@@ -63,9 +64,10 @@ if __name__ == '__main__':
 
         # visualize 
         import turtle 
-        #turtle.screensize(5000, 5000)
-        ld.turtle.visualise(done=False, bye=False, width=2000, height=2000)
+        turtle.screensize(5000, 5000)
+        ld.turtle.visualise()#(done=False, bye=False, width=2000, height=2000)
 
+        # can't work out how to exit and go to next line yet, so these won't be saved for now 
 
         turtle.Screen().getcanvas().postscript(file=eps_path)
         
