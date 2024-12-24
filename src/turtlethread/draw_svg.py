@@ -472,8 +472,8 @@ def drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1,
                         else: 
                             moved_pts.append((pt[0]+curr_pos[0], pt[1]+curr_pos[1]))
 
-                    print(moved_pts) 
-                    print() 
+                    #print(moved_pts) 
+                    #print() 
 
                     te.ScanlineFill().fill(te, moved_pts) 
 
