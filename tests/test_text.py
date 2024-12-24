@@ -15,7 +15,7 @@ Pte. Ltd. '''
 
 if __name__ == '__main__': 
     print("STARTED")
-    with turtlethread.LetterDrawer(turtlethread.Turtle(scale=0.4)) as ld: 
+    with turtlethread.LetterDrawer(turtlethread.Turtle(scale=1.0)) as ld: # this scale affects scale of sewing machine 
 
         with ld.turtle.jump_stitch(): 
             ld.turtle.goto(-350, 300)
@@ -26,6 +26,7 @@ if __name__ == '__main__':
         ld.load_font('Comic') # comic sans 
         ld.load_font('Times') # times new roman 
 
+        
         # multi-font text part 
         #print("HEF:OIDN")
         ld.draw_one_letter('Arial', 'T', 120, fill=False, outline=True) 
@@ -37,9 +38,11 @@ if __name__ == '__main__':
         ld.draw_letter_gap(120) 
         ld.draw_one_letter('Times', 'T', 120, fill=False, outline=True) 
         ld.draw_letter_gap(120) 
+        
 
         
-        ld.draw_string('Arial', "SAMPLE", 120, fills=True, outlines=True, )#letter_gaps=[0.02, 0.03, 0.04, 0.05, 0.06, 0.07]) 
+        ld.draw_string('Arial', "SAM", 120, fills=True, outlines=False, full_fill=True, letter_gaps=[0.02, 0.05, 0.07]) 
+        ld.draw_string('Arial', 'PLE', 120, fills=True, outlines=True, full_fill=False)
         
         with ld.turtle.jump_stitch(): 
             ld.turtle.goto(-350, 300)

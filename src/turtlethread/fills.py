@@ -119,6 +119,7 @@ class ScanlineFill(Fill):
         return jump_stitches
     
     def fill(self, turtle, points):
+        assert len(points)>0, "'points' cannot be an empty list! (in ScanlineFill)"
         if not self.auto:
             self._fill_at_angle(turtle, points, self.angle)
         else:

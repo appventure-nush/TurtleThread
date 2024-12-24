@@ -18,5 +18,9 @@ pts = [(0,0),
 a = turtlethread.Turtle() 
 a.ScanlineFill(90).fill(a, pts) # this bugs out 
 
+from pathlib import Path
+savedir = Path(__file__).parent / "visualise_postscript" 
+a.save(str(savedir / "test_scanlinefill.exp"))
+
 a.visualise() 
 
