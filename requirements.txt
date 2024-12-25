@@ -24,4 +24,9 @@ pytest
 pytest-cov
 pytest-randomly
 
+opentypesvg 
+beautifulsoup4 
+fuzzywuzzy 
+fast-tsp 
+
 -e .
