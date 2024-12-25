@@ -474,6 +474,10 @@ def drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1,
 
                     #print(moved_pts) 
                     #print() 
+                    
+                    # remove first and last points, to avoid messing with scanlinefill 
+                    moved_pts.pop() 
+                    moved_pts.pop(0) 
 
                     te.ScanlineFill().fill(te, moved_pts) 
 
