@@ -450,6 +450,27 @@ def drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1,
                     parent_dirn = hull_is_clockwise(hulls[p]) 
                     child_dirn = hull_is_clockwise(hulls[fidx]) 
 
+                    # adjust child hull's points a bit based on direction 
+                    if child_dirn: 
+                        # clockwise - first half up, second half down 
+                        t = len(hulls[fidx])//2 
+                        hulls[p][best_idx][1] += 1 
+                        hulls[p][best_idx+1][1] -= 1 
+                        for i in range(t): 
+                            hulls[fidx][i][1] += 1 
+                        for i in range(t, len(hulls[fidx])): 
+                            hulls[fidx][i][1] -= 1 
+                    else: 
+                        # anticlockwise - first half down, second half up 
+                        t = len(hulls[fidx])//2 
+                        hulls[p][best_idx][1] -= 1 
+                        hulls[p][best_idx+1][1] += 1 
+                        for i in range(t): 
+                            hulls[fidx][i][1] -= 1 
+                        for i in range(t, len(hulls[fidx])): 
+                            hulls[fidx][i][1] += 1 
+
+
                     if (parent_dirn ^ child_dirn):                     
                         # if opposite dirn, it works 
                         hulls[p] = hulls[p][:best_idx] + hulls[fidx] + hulls[p][best_idx:] # add child's path to parent's path 
@@ -1029,7 +1050,7 @@ def get_hulls(w_attr, min_dist, filename, height, w_color=None, thickness=1, fil
     _debug_drawSVG(ttt, filename, height, w_color, thickness, False, True, fill_min_y_dist, fill_min_x_dist, full_fill, flip_y_in, w_attr=w_attr)
     hull = [] 
     for x, y, _ in ttt.pattern.to_pyembroidery().stitches: 
-        hull.append((x,y))
+        hull.append([x,y])
     
     if len(hull)>1: 
         hulls.append(hull) 

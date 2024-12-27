@@ -123,7 +123,7 @@ class LetterDrawer():
         return list(self.loaded_fonts.keys()) 
 
 
-    def draw_one_letter(self, fontname, lettername, fontsize=20, colour='#000000', thickness=1, fill=True, outline=False, fill_min_y_dist:int=10, fill_min_x_dist=10, full_fill=True, turtle=None, flip_y=False): # TODO support changing colours 
+    def draw_one_letter(self, fontname, lettername, fontsize=20, colour='#000000', thickness=1, fill=False, outline=True, fill_min_y_dist:int=10, fill_min_x_dist=10, full_fill=True, turtle=None, flip_y=False): # TODO support changing colours 
         # draws one letter with the turtles, with the specified fields. 
         # turtle defaults to self.turtle 
         if turtle is None: 
@@ -165,7 +165,7 @@ class LetterDrawer():
             self.turtle.goto(currpos[0] + letter_gap*fontsize, currpos[1])
         #print("DRAEW")
         
-    def draw_string(self, fontname, string, fontsize, colours='#000000', thicknesses = 1, fills=True, outlines=False, fill_min_y_dist=10, fill_min_x_dist=10, full_fill=True, letter_gaps=None, turtle=None, flip_y=False):  # TODO make a version that considers kerning 
+    def draw_string(self, fontname, string, fontsize, colours='#000000', thicknesses = 1, fills=False, outlines=True, fill_min_y_dist=10, fill_min_x_dist=10, full_fill=True, letter_gaps=None, turtle=None, flip_y=False):  # TODO make a version that considers kerning 
 
         # this draws a multiline string, automatically drawing letter gaps as desired 
         # if fills is True, will fill the text with satin stitch. else, will draw the text outline 
