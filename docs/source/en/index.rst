@@ -9,12 +9,15 @@ TurtleThread is a tool inspired by `TurtleStitch <https://www.turtlestitch.org/>
 
 To learn how to use TurtleThread, we recommend looking at the `introduction to TurtleThread <auto_examples/gallery_introduksjon.html>`_, any of the other `example scripts <auto_examples/index.html>`_, or `watch our talk at PyCon US 2023 <https://www.youtube.com/watch?v=OcuhrDIrblo>`_ (the sound can be weird on some devices).
 
+If you are moving to TurtleThread from Python Turtle, take a look at the intermediate's tutorial.
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
    installation
    intro/index
+   intermediate/index
    christmas/index
    auto_examples/index
    api/index

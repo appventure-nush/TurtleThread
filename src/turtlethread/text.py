@@ -124,6 +124,34 @@ class LetterDrawer():
 
 
     def draw_one_letter(self, fontname, lettername, fontsize=20, colour='#000000', thickness=1, fill=True, outline=False, fill_min_y_dist:int=10, fill_min_x_dist=10, full_fill=True, turtle=None, flip_y=False): # TODO support changing colours 
+        """This function draws a single letter.
+
+        Parameters
+        ----------
+        fontname : str
+            Specify a font name (from the loaded fonts) 
+        lettername : str
+            Specify the name of a letter. Spaces should be called 'space' and not ' '.
+        fontsize : int (optional, default=20)
+            Specify the font size used to draw the text.
+        fill : bool (optional, default=True)
+            Specify whether or not the text should be filled.
+        full_fill : bool (optional, default=True)
+            Specify whether the text should be filled with ``full_fill`` or ``partial_fill`` (only used if ``fill=True``). 
+            Note that ``full_fill`` can have bugs at small font sizes (120 is considered small), while ``partial_fill`` might cross over the boundaries of the text. 
+        outline : bool (optional, default=False)
+            Specify whether the text should be outlined (it is recommended to outline when not filling or using ```partial_fill```, but not ```full_fill```). 
+        flip_y : bool (optional, default=False)
+            Allow you to vertically flip the text if desired. Defaults to ``False``.
+        fill_min_x_dist : int (optional, default=10)
+            Advanced parameter deciding the resolution of ``partial_fill``.
+            If ``partial_fill`` is taking too long, consider increasing this value to make it run faster, at the cost of a lower resolution of fill.
+            Default value is 10, and this should never be set below 5.
+        fill_min_y_dist : int (optional, default=10)
+            Advanced parameter deciding the resolution of ``partial_fill``.
+            If ``partial_fill`` is taking too long, consider increasing this value to make it run faster, at the cost of a lower resolution of fill.
+            Default value is 10, and this should never be set below 5.
+        """
         # draws one letter with the turtles, with the specified fields. 
         # turtle defaults to self.turtle 
         if turtle is None: 
@@ -166,6 +194,35 @@ class LetterDrawer():
         #print("DRAEW")
         
     def draw_string(self, fontname, string, fontsize, colours='#000000', thicknesses = 1, fills=True, outlines=False, fill_min_y_dist=10, fill_min_x_dist=10, full_fill=True, letter_gaps=None, turtle=None, flip_y=False):  # TODO make a version that considers kerning 
+        """This function draws a string of letters.
+        
+        Parameters
+        ----------
+        fontname : str
+            Specify a font name (from the loaded fonts) 
+        lettername : str
+            Specify the name of a letter. Spaces should be called 'space' and not ' '.
+        fontsize : int (optional, default=20)
+            Specify the font size used to draw the text.
+        fills : bool/list[bool] (optional, default=True)
+            Specify whether or not the text should be filled. Also accepts a list with one element per letter in the string.
+        full_fill : bool (optional, default=True)
+            Specify whether the text should be filled with ``full_fill`` or ``partial_fill`` (only used if ``fill=True``). 
+            Note that ``full_fill`` can have bugs at small font sizes (120 is considered small), while ``partial_fill`` might cross over the boundaries of the text. 
+        outlines : bool/list[bool] (optional, default=False)
+            Specify whether the text should be outlined (it is recommended to outline when not filling or using ```partial_fill```, but not ```full_fill```). 
+            Also accepts a list with one element per letter in the string.
+        flip_y : bool (optional, default=False)
+            Allow you to vertically flip the text if desired. Defaults to ``False``.
+        fill_min_x_dist : int (optional, default=10)
+            Advanced parameter deciding the resolution of ``partial_fill``.
+            If ``partial_fill`` is taking too long, consider increasing this value to make it run faster, at the cost of a lower resolution of fill.
+            Default value is 10, and this should never be set below 5.
+        fill_min_y_dist : int (optional, default=10)
+            Advanced parameter deciding the resolution of ``partial_fill``.
+            If ``partial_fill`` is taking too long, consider increasing this value to make it run faster, at the cost of a lower resolution of fill.
+            Default value is 10, and this should never be set below 5.
+        """
 
         # this draws a multiline string, automatically drawing letter gaps as desired 
         # if fills is True, will fill the text with satin stitch. else, will draw the text outline 

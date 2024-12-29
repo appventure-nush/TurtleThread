@@ -1,6 +1,6 @@
 .. _getting-started:
 
-Getting started TurtleThread
+Getting started with TurtleThread
 ============================
 
 .. toctree::
