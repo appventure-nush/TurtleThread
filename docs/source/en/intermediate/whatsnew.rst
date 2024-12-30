@@ -20,6 +20,8 @@ create stitches at a constant distance apart.
     :linenos:
     :emphasize-lines: 5
 
+.. image:: ../../../_static/figures/intermediate/eg_running_stitch.png 
+
 Notice the use of the ``with turtle.running_stitch(...)`` on line 4. This is known as a **context manager**, allowing 
 us to easily segment our code into different sections with different stitches.
 
