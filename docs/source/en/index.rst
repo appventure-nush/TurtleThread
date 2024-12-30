@@ -19,6 +19,7 @@ If you are moving to TurtleThread from Python Turtle, take a look at the interme
    intro/index
    intermediate/index
    christmas/index
+   stitches
    auto_examples/index
    api/index
 
