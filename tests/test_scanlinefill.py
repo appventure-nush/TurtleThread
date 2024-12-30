@@ -13,7 +13,8 @@ pts = [(0,0),
        (80, 0), 
        (80, 40), 
        (20, 40), 
-       (20, 0), ] 
+       (20, 0), 
+       (0,0), ] 
 
 a = turtlethread.Turtle() 
 a.ScanlineFill(90).fill(a, pts) # this bugs out 

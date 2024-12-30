@@ -15,7 +15,7 @@ Pte. Ltd. '''
 
 if __name__ == '__main__': 
     print("STARTED")
-    with turtlethread.LetterDrawer(turtlethread.Turtle(scale=1.0)) as ld: # this scale affects scale of sewing machine 
+    with turtlethread.LetterDrawer(turtlethread.Turtle(scale=0.6)) as ld: # this scale affects scale of sewing machine 
 
         with ld.turtle.jump_stitch(): 
             ld.turtle.goto(-350, 300)
@@ -23,7 +23,7 @@ if __name__ == '__main__':
         #print(ld.turtle.position())
         ld.load_font('Arial') # outputs the location of the font file used 
         ld.load_font('Calibri')
-        ld.load_font('Comic') # comic sans 
+        '''ld.load_font('Comic') # comic sans 
         ld.load_font('Times') # times new roman 
 
         
@@ -37,11 +37,23 @@ if __name__ == '__main__':
         ld.draw_one_letter('Comic', 'X', 120, fill=False, outline=True) 
         ld.draw_letter_gap(120) 
         ld.draw_one_letter('Times', 'T', 120, fill=False, outline=True) 
+        ld.draw_letter_gap(120) '''
+
+
+        # draw "TEXT" with different fonts 
+        ld.draw_one_letter('Arial', 'T', 120, fill=False, outline=True) 
+        ld.draw_letter_gap(120) # we must have a letter_gap if we're using ld.draw_one_letter 
+        ld.draw_string('Calibri', 'EX', 120, fills=False, outlines=True) # ld.draw_string handles letter_gaps inside 
         ld.draw_letter_gap(120) 
+        ld.draw_one_letter('Arial', 'T', 120, fill=False, outline=True) 
         
+        ld.draw_letter_gap(120) 
+        ld.draw_string('Arial', ' ', 120) 
+        ld.draw_letter_gap(120) 
 
         
-        ld.draw_string('Arial', "SAM", 120, fills=True, outlines=False, full_fill=True, letter_gaps=[0.02, 0.05, 0.07]) 
+        ld.draw_string('Arial', "SAM", 120, fills=True, outlines=False, full_fill=True)#, letter_gaps=[0.02, 0.05, 0.07]) 
+        ld.draw_letter_gap(120)
         ld.draw_string('Arial', 'PLE', 120, fills=True, outlines=True, full_fill=False)
         
         with ld.turtle.jump_stitch(): 

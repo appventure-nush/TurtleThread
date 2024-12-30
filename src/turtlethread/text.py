@@ -194,7 +194,6 @@ class LetterDrawer():
         #print("DRAEW")
         
     def draw_string(self, fontname, string, fontsize, colours='#000000', thicknesses = 1, fills=True, outlines=False, fill_min_y_dist=10, fill_min_x_dist=10, full_fill=True, letter_gaps=None, turtle=None, flip_y=False):  # TODO make a version that considers kerning 
-<<<<<<< HEAD
         """This function draws a string of letters.
         
         Parameters
@@ -224,9 +223,6 @@ class LetterDrawer():
             If ``partial_fill`` is taking too long, consider increasing this value to make it run faster, at the cost of a lower resolution of fill.
             Default value is 10, and this should never be set below 5.
         """
-=======
->>>>>>> main
-
         # this draws a multiline string, automatically drawing letter gaps as desired 
         # if fills is True, will fill the text with satin stitch. else, will draw the text outline 
 
