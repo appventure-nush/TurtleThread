@@ -499,8 +499,8 @@ class Turtle(TNavigator):
         
         Parameters
         ----------
-        mode : str
-            The fill mode to use, currently only "satin" is supported.
+        mode : turtlethread.fills.Fill
+            The fill mode to use. Refer to the API reference for the possible fills.
         """
         self.filling = True
         self.fill_mode = mode
@@ -516,16 +516,6 @@ class Turtle(TNavigator):
             self._fill_stitch_position_stack.append(self._fill_stitch_position_stack[0])
         
         self.fill_mode.fill(self, self._fill_stitch_position_stack)
-
-    def ScanlineFill(self, angle="auto"):
-        """The Scanline fill will create straight lines across the fill area to fill it up. Useful for small areas.
-
-        Parameters
-        -----------
-        angle (default='auto'):
-            Angle of the lines, in radians. May also be the string 'auto'.
-            If 'auto', the program will automatically try the angles of 0, 45, 90, and 135 degrees, to minimize the number of jump stitches."""
-        return fills.ScanlineFill(angle=angle)
 
             
 
