@@ -9,9 +9,10 @@ name = "turtlethread"
 keywords = [
     "turtlethread",
 ]
-version = "0.0.11"
+version = "0.0.2"
 description = "A Turtle-interface for making embroidery files"
 authors = [
+    { name = "Wong Yue Heng, Tan Junheng and Yu Simu", email = "appventure@nushigh.edu.sg" },
     { name = "Marie Roald & Yngve Mardal Moe", email = "yngve.m.moe@gmail.com" },
 ]
 classifiers = [
@@ -26,9 +27,18 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
     "pyembroidery",
+    "matplotlib",
+    "scikit-learn",
+    "opentypesvg",
+    "svglib",
+    "PyMuPDF",
+    "beautifulsoup4",
+    "fuzzywuzzy",
+    "fast-tsp",
     "typing_extensions ; python_version < \"3.11\"",
 ]
 
@@ -40,12 +50,11 @@ file = "README.md"
 content-type = "text/markdown"
 
 [project.urls]
-Homepage = "https://github.com/marieroald/turtlethread"
+Homepage = "https://github.com/appventure-nush/turtlethread"
 
 [project.optional-dependencies]
 docs = [
     "Jinja2>=3.0",
-    "matplotlib",
     "numpydoc",
     "pydata-sphinx-theme==0.15.2",
     "sphinx==7.2.6",

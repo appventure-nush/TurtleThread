@@ -4,23 +4,19 @@ TurtleThread is a Python library inspired by [TurtleStitch](https://www.turtlest
 ## Lisense
 The code is licensed under a GPLv3 license, which means that you can use it for anything you'd like. However, if you use it to make your own tools, your tool must be open source and licensed with the GPLv3 license. For more information, see this [guide](https://www.gnu.org/licenses/quick-guide-gplv3.en.html).
 
-## Installation
-TurtleThread is available on PyPI, so it can be pip installed easily by writing
-
-```bash
-pip install turtlethread
-```
-
-In a terminal window. Alternatively, to install the latest development version, you can install directly from GitHub
-
-```bash
-pip install git+https://github.com/marieroald/turtlethread.git
-```
-
 ## Development
-TurtleThread is developed by Marie Roald and Yngve Mardal Moe. It is still under development, so we appreciate any issues about eventual bugs you may encounter. We are also happy for community contributions, so if you want to add some functionality, then we encourage you to describe it in an issue and submit a pull request with the feature.
+This is a fork of TurtleThread by AppVenture, NUS High's Computer Science Interest Group. The three contributors from AppVenture are Wong Yue Heng, Tan Junheng, and Yu Simu. A majority of TurtleThread was developed by Marie Roald and Yngve Mardal Moe.  
 
-## Examples
+TurtleThread is still under development, so we appreciate any issues about eventual bugs you may encounter. We are also happy for community contributions, so if you want to add some functionality, then we encourage you to describe it in an issue and submit a pull request with the feature.  
+
+## Installation
+As this is a fork of TurtleThread, it must be installed via the following command, and **NOT** from PyPI.
+
+```bash
+pip install git+https://github.com/appventure-nush/TurtleThread
+``` 
+
+## Example 
 ```python
 from turtlethread import Turtle
 
@@ -39,12 +35,6 @@ with pen.running_stitch(stitch_length=20):
         pen.right(120)
 
 pen.save("pattern.png")
-pen.save("pattern.jef")
+pen.save("pattern.exp")
 ```
 
-## TODO
-There are a few features we currently do not support but aim to in the future.
-
- * Other stitches like zig-zag or satin stitch
- * Text
- * Filled dots
