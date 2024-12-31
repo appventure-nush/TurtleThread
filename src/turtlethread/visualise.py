@@ -7,6 +7,7 @@ USE_SPHINX_GALLERY = False
 
 
 def get_dimensions(stitches):
+    if len(stitches) == 0: return 0, 0
     x = [s[0] for s in stitches]
     y = [s[1] for s in stitches]
     return max(*x) - min(*x), max(*y) - min(*y)
@@ -260,6 +261,8 @@ def density(stitches):
     # we can estimate the each stitch by some equally spaced apart
     # points, and then find areas with high density.
     # TODO: make algorithm work for longer stitches as well
+
+    if len(stitches) == 0: return False
 
     # Get sampling points
     points = []
