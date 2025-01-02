@@ -17,6 +17,7 @@ debug = []
 #import turtle 
 
 import turtlethread 
+from turtlethread import fills
 from bs4 import BeautifulSoup
 
 
@@ -500,7 +501,7 @@ def drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1,
                     moved_pts.pop() 
                     moved_pts.pop(0) 
 
-                    te.ScanlineFill().fill(te, moved_pts) 
+                    fills.ScanlineFill("auto").fill(te, moved_pts) 
 
         else: 
             debug = [] 
