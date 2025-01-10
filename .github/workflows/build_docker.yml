@@ -1,7 +1,9 @@
 name: Build and push to registry
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - min_docs
 
 jobs:
   build:
