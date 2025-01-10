@@ -52,18 +52,18 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.intersphinx",
     "numpydoc",
-    "sphinx_gallery.gen_gallery",
+#    "sphinx_gallery.gen_gallery",
     "sphinx_toolbox.collapse",
     "turtlethread.sphinx_plugins.manual_example_code_directive",
 ]
 
-sphinx_gallery_conf = {
-    "examples_dirs": os.path.join("../../../examples", language),  # path to your example scripts
-    "gallery_dirs": "auto_examples",  # path to where to save gallery generated output
-    "image_scrapers": (turtlethread_scraper),
-    "filename_pattern": "/gallery",
-    "reset_argv": lambda x, y: ["MOCK_TURTLE"],
-}
+#sphinx_gallery_conf = {
+#    "examples_dirs": os.path.join("../../../examples", language),  # path to your example scripts
+#    "gallery_dirs": "auto_examples",  # path to where to save gallery generated output
+#    "image_scrapers": (turtlethread_scraper),
+#    "filename_pattern": "/gallery",
+#    "reset_argv": lambda x, y: ["MOCK_TURTLE"],
+#}
 numpydoc_show_class_members = False
 numpydoc_show_inherited_class_members = False
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
