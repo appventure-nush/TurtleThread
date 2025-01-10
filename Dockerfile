@@ -1,6 +1,6 @@
-FROM python:3.12-bookworm
+FROM python:3.12-bookworm AS build
 
-WORKDIR /app
+WORKDIR /app 
 
 COPY src/ ./src
 COPY requirements.txt .
@@ -18,9 +18,17 @@ COPY docs/ ./docs
 WORKDIR /app/docs
 RUN make en
 
-FROM nginx
-COPY --from=0 /app/docs/_build/en /usr/share/nginx/html
+FROM busybox:musl AS deploy
 
+EXPOSE 80
+
+RUN adduser -D static
+USER static
+WORKDIR /home/static
+
+COPY --from=build /app/docs/_build/en /data/www/
+
+CMD ["busybox", "httpd", "-f", "-v", "-p", "80", "-h", "/data/www"]
 
 
 # ENV TURTLETHREAD_VENV=/turtlethread-venv
