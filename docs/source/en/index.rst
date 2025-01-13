@@ -12,7 +12,8 @@ If you are moving to TurtleThread from Python Turtle, take a look at the `interm
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-
+   
+   installation
    intermediate/index
    stitches
    api/index
