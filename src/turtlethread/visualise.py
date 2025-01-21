@@ -1,7 +1,7 @@
 from pyembroidery import JUMP, STITCH, TRIM
 import tkinter as tk
 from tkinter.constants import LEFT, RIGHT
-#from sklearn.cluster import DBSCAN
+import os
 
 USE_SPHINX_GALLERY = False
 
@@ -109,6 +109,10 @@ def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, spee
     #
     # (This looks like it would conflict with the 'turtle' variable but it does not)
     from turtle import Screen, Turtle
+
+    if os.name == 'nt':
+        from ctypes import windll
+        windll.shcore.SetProcessDpiAwareness(2)
 
     if turtle is None:
         # If turtle is None, grab the default turtle and set its speed to fastest
