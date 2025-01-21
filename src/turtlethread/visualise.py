@@ -277,12 +277,6 @@ def density(stitches):
             points.append(((x+prevx)/2, (y+prevy)/2))
             points.append((3*(x+prevx)/4, 3*(y+prevy)/4))
 
-    # Find clusters
-    #db = DBSCAN(eps=0.5, min_samples=20) # Not hard and fast values
-    #db.fit(points)
-    #labels = db.labels_
-    #return len(set(labels)) > 1
-
     return density_from_points(points, dist=0.5, num=20)
 
 
