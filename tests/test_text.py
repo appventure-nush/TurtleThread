@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
 
         # draw "TEXT" with different fonts 
-        ld.draw_one_letter('Arial', 'T', 120, fill=False, outline=True) 
+        ld.draw_one_letter('Arial', 'T', 120, fill=True, outline=True) 
         ld.draw_letter_gap(120) # we must have a letter_gap if we're using ld.draw_one_letter 
         ld.draw_string('Calibri', 'EX', 120, fills=False, outlines=True) # ld.draw_string handles letter_gaps inside 
         ld.draw_letter_gap(120) 

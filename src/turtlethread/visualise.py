@@ -1,7 +1,7 @@
 from pyembroidery import JUMP, STITCH, TRIM
 import tkinter as tk
 from tkinter.constants import LEFT, RIGHT
-from sklearn.cluster import DBSCAN
+#from sklearn.cluster import DBSCAN
 
 USE_SPHINX_GALLERY = False
 
@@ -274,7 +274,29 @@ def density(stitches):
             points.append((3*(x+prevx)/4, 3*(y+prevy)/4))
 
     # Find clusters
-    db = DBSCAN(eps=0.5, min_samples=20) # Not hard and fast values
-    db.fit(points)
-    labels = db.labels_
-    return len(set(labels)) > 1
+    #db = DBSCAN(eps=0.5, min_samples=20) # Not hard and fast values
+    #db.fit(points)
+    #labels = db.labels_
+    #return len(set(labels)) > 1
+
+    return density_from_points(points, dist=0.5, num=20)
+
+
+def density_from_points(pts, dist=0.5, num=20):
+    adjmat = [ [ -1 for j in range(len(pts))] for i in range(len(pts))]
+    for i in range(len(pts)):
+        adjmat[i][i] = 1 # close enough 
+        for j in range(i+1, len(pts)):
+            dx = pts[i][0] - pts[j][0]
+            dy = pts[i][1] - pts[j][1]
+            if (dx**2 + dy**2 < dist**2):
+                # close enough!!
+                adjmat[i][j] = 1
+                adjmat[j][i] = 1
+            else:
+                adjmat[i][j] = 0
+                adjmat[j][i] = 0
+        # pruning: check if already reached
+        if sum(adjmat[i]) >= num:
+            return True
+    return False
