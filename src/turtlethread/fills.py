@@ -38,6 +38,7 @@ class ScanlineFill(Fill):
             self.angle = angle
             
     def _fill_at_angle(self, turtle, points, angle, simulate=False):
+        print(points)
         # Rotate the coordinates
         rot_points = []
         for x, y in points:
@@ -99,16 +100,21 @@ class ScanlineFill(Fill):
 
         jump_stitches = 0
         # Jump to start coordinate if needed
-        if abs(Vec2D(scanned_lines[0][0][0], scanned_lines[0][0][1]) - turtle.pos()) > 1:
+        print(scanned_lines)
+        start_idx = 0
+        while len(scanned_lines[start_idx]) < 1:
+            start_idx += 1
+
+        if abs(Vec2D(scanned_lines[start_idx][0][0], scanned_lines[start_idx][0][1]) - turtle.pos()) > 1:
             with turtle.jump_stitch():
                 jump_stitches += 1
-                if not simulate: turtle.goto(scanned_lines[0][0])
+                if not simulate: turtle.goto(scanned_lines[start_idx][0])
 
         no_fill_in_current_iteration_flag = False
         while not no_fill_in_current_iteration_flag:
             no_fill_in_current_iteration_flag = True
             jump = False
-            for i in range(len(scanned_lines) - 1):
+            for i in range(start_idx, len(scanned_lines) - 1):
                 with turtle.direct_stitch():
                     if len(scanned_lines[i]) >= 2:
                         no_fill_in_current_iteration_flag = False
