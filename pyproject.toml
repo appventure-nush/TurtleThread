@@ -31,7 +31,6 @@ classifiers = [
 ]
 dependencies = [
     "pyembroidery",
-    "scikit-learn",
     "opentypesvg",
     "svglib",
     "PyMuPDF",
