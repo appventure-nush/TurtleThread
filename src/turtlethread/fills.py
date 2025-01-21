@@ -38,7 +38,6 @@ class ScanlineFill(Fill):
             self.angle = angle
             
     def _fill_at_angle(self, turtle, points, angle, simulate=False):
-        print(points)
         # Rotate the coordinates
         rot_points = []
         for x, y in points:
@@ -100,7 +99,6 @@ class ScanlineFill(Fill):
 
         jump_stitches = 0
         # Jump to start coordinate if needed
-        print(scanned_lines)
         start_idx = 0
         while len(scanned_lines[start_idx]) < 1:
             start_idx += 1
