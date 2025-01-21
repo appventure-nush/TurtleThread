@@ -1,8 +1,11 @@
 import os 
 import tempfile 
-from matplotlib import font_manager 
-from fuzzywuzzy import process, fuzz 
+from .font_manager import findSystemFonts 
 from pathlib import Path 
+
+import warnings
+warnings.simplefilter("ignore")
+from fuzzywuzzy import process, fuzz 
 
 from opentypesvg import fonts2svg 
 
@@ -73,7 +76,7 @@ class LetterDrawer():
                 search_threshold = LetterDrawer.font_search_score_threshold 
 
             # get system fonts 
-            fontpaths = font_manager.findSystemFonts(fontpaths=None, fontext='otf')
+            fontpaths = findSystemFonts(fontpaths=None, fontext='otf')
             fontnames = [Path(fp).name.lower() for fp in fontpaths] 
             res_ttf = process.extract(fontname.lower()+".ttf", fontnames, scorer=fuzz.ratio) 
             res_otf = process.extract(fontname.lower()+".otf", fontnames, scorer=fuzz.ratio) 
