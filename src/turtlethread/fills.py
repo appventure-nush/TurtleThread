@@ -5,11 +5,14 @@ from .base_turtle import Vec2D
 
 def rotate_point(x, y, angle):
     """Rotate a point around the origin by a given angle (in radians)."""
-    cos_theta = math.cos(angle)
-    sin_theta = math.sin(angle)
-    x_new = x * cos_theta - y * sin_theta
-    y_new = x * sin_theta + y * cos_theta
-    return x_new, y_new
+    if x is not None and y is not None: # Not jump indicator
+        cos_theta = math.cos(angle)
+        sin_theta = math.sin(angle)
+        x_new = x * cos_theta - y * sin_theta
+        y_new = x * sin_theta + y * cos_theta
+        return x_new, y_new
+    else:
+        return x, y
 
 class Fill(ABC):
     """A class to represent a fill. This is a base class for other fill types.
@@ -27,7 +30,7 @@ class ScanlineFill(Fill):
     angle:
         Angle of the lines, in radians. May also be the string 'auto'.
         If 'auto', the program will automatically try the angles of 0, 45, 90, and 135 degrees, to minimize the number of jump stitches."""
-    def __init__(self, angle : str | int | float):
+    def __init__(self, angle : str | int | float = "auto"):
         if type(angle) == str and angle == "auto":
             self.auto = True
         else:
@@ -47,7 +50,12 @@ class ScanlineFill(Fill):
         max_x = rot_points[0][0]
         min_y = rot_points[0][1]
         max_y = rot_points[0][1]
+
+
         for i in range(len(rot_points) - 1):
+            # If points is (None, None, ignore that edge!)
+            if rot_points[i][0] is None or rot_points[i + 1][0] is None:
+                continue 
             edges.append((rot_points[i], rot_points[i + 1]))
             min_x = min(min_x, rot_points[i + 1][0])
             max_x = max(max_x, rot_points[i + 1][0])
