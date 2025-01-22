@@ -493,10 +493,14 @@ class Turtle(TNavigator):
         bye : bool
             If True, then ``turtle.bye()`` will be called after drawing.
         """
-        visualise_pattern(
-            self.pattern.to_pyembroidery(),
-            turtle=turtle, width=width, height=height, scale=scale, speed=speed, trace_jump=trace_jump, done=done, bye=bye
-        )
+        try:
+            visualise_pattern(
+                self.pattern.to_pyembroidery(),
+                turtle=turtle, width=width, height=height, scale=scale, speed=speed, trace_jump=trace_jump, done=done, bye=bye
+            )
+        except Exception as e:
+            # Errors when you close the window! Yikes
+            pass
 
     def show_info(self):
         """Display information about this turtle's embroidery pattern."""
