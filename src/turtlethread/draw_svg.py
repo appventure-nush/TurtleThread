@@ -14,7 +14,6 @@ flip_y = True
 debug = [] 
 
 
-#import turtle 
 
 import turtlethread 
 from turtlethread import fills
@@ -49,6 +48,8 @@ min_turtle_dist = 10
 
 prev_stitch = None 
 
+
+# FUNCTION TO CONVERT SVG POSITION TO TURTLE POSITION -----------------------------------------------------------------------------
 
 def move_turtle_to(te:turtlethread.Turtle, x, y): 
     global prev_stitch 
@@ -136,11 +137,13 @@ def move_turtle_to(te:turtlethread.Turtle, x, y):
     
 
 
-def Bezier(p1, p2, t):  # 一阶贝塞尔函数
+# FUNCTIONS TO DRAW SVG CURVES ------------------------------------------------------------------------------------------------------------------
+
+def Bezier(p1, p2, t):  
     return p1 * (1 - t) + p2 * t
 
 
-def Bezier_2(te, x1, y1, x2, y2, x3, y3):  # 二阶贝塞尔函数
+def Bezier_2(te, x1, y1, x2, y2, x3, y3): 
     move_turtle_to(te, x1, y1)
     #te.pendown()
     for t in range(0, WriteStep + 1):
@@ -153,7 +156,7 @@ def Bezier_2(te, x1, y1, x2, y2, x3, y3):  # 二阶贝塞尔函数
     ##te.penup()
 
 
-def Bezier_3(te, startx, starty, x1, y1, x2, y2, x3, y3, x4, y4):  # 三阶贝塞尔函数
+def Bezier_3(te, startx, starty, x1, y1, x2, y2, x3, y3, x4, y4):  
     x1 = startx + x1
     y1 = starty - y1
     x2 = startx + x2
@@ -161,7 +164,7 @@ def Bezier_3(te, startx, starty, x1, y1, x2, y2, x3, y3, x4, y4):  # 三阶贝�
     x3 = startx + x3
     y3 = starty - y3
     x4 = startx + x4
-    y4 = starty - y4  # 坐标变换
+    y4 = starty - y4  
     move_turtle_to(te, x1, y1)
     #te.pendown()
     for t in range(0, WriteStep + 1):
@@ -174,7 +177,7 @@ def Bezier_3(te, startx, starty, x1, y1, x2, y2, x3, y3, x4, y4):  # 三阶贝�
     #te.penup()
 
 
-def Moveto(te, startx, starty, x, y):  # 移动到svg坐标下（x，y）
+def Moveto(te, startx, starty, x, y):  
     with te.jump_stitch(): 
         move_turtle_to(te, startx + x, starty - y)
 
@@ -189,7 +192,7 @@ def Moveto_r(te, dx, dy):
     #te.pendown()
 
 
-def line(te, startx, starty, x1, y1, x2, y2):  # 连接svg坐标下两点
+def line(te, startx, starty, x1, y1, x2, y2): 
     #te.penup()
     with te.jump_stitch(): 
         move_turtle_to(te, startx + x1, starty - y1)
@@ -199,7 +202,7 @@ def line(te, startx, starty, x1, y1, x2, y2):  # 连接svg坐标下两点
     #te.penup()
 
 
-def Lineto_r(te, dx, dy):  # 连接当前点和相对坐标（dx，dy）的点
+def Lineto_r(te, dx, dy):  
     #te.pendown()
     with te.running_stitch(30): 
         if flip_y: 
@@ -245,6 +248,7 @@ def Curveto_r(te, startx, starty, x1, y1, x2, y2, x, y):  # 三阶贝塞尔曲�
     Yh = y - y2
 
 
+# FUNCTIONS TO DEAL WITH READING SVG FILES ------------------------------------------------------------------------------------------------------
 def transform(w_attr):
     funcs = w_attr.split(' ')
     for func in funcs:
@@ -275,7 +279,11 @@ def readPathAttrD(w_attr):
 
 
 
-def drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1, fill=True, outline=False, fill_min_y_dist:int=10, fill_min_x_dist=10, full_fill=True, flip_y_in:bool=False): # TODO consider colour 
+
+# draw svg function + debug version -----------------------------------------------------------------------------------------------------
+
+
+def drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1, fill=True, outline=False, fill_min_y_dist:int=10, fill_min_x_dist=10, full_fill=True, flip_y_in:bool=False): 
     # draws an SVG file with the turtle 
     #print("HI DRAWING SVG")
 
@@ -290,17 +298,6 @@ def drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1,
     Width = height * float(viewbox[2]) / float(viewbox[3]) #float(SVG.svg.attrs['width'][0: -2])
     if (SVG.svg.g and 'transform' in SVG.svg.g.attrs): 
         transform(SVG.svg.g.attrs['transform'])
-    #if first:
-        #te.setup(height=Height, width=Width)
-        #te.setworldcoordinates(-Width / 2, 300, Width -
-        #                       Width / 2, -Height + 300)
-        #first = False
-    #te.tracer(100)
-    #te.pensize(1)
-    #te.speed(10000)
-
-    #turtle.speed(0) 
-    #turtle.tracer(0,0)
 
 
     s = Height / float(viewbox[3]) 
@@ -328,22 +325,12 @@ def drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1,
         
         starty = -starty 
 
-    #print("START:", [startx, starty])
-
-
-    #te.penup()
-
-    # TODO: DEAL WITH FILL USING ZIGZAG/SATIN STITCH 
-
-
-    #turtle.screensize(Width, Height)
-    #screen = turtle.Screen() 
-
 
     global debug 
     # if it's fill 
     if fill: 
         if full_fill: 
+            # full fill: first deal with convex hulls 
             
             # deal with the hulls whatever 
             hulls = [] 
@@ -382,7 +369,7 @@ def drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1,
                     # check if we already know their relationship 
 
 
-                    res = which_is_inner_hull(hulls[i], hulls[j]) # this assumes the paths are convex hulls. I think it's close enough but TODO might have problems here 
+                    res = which_is_inner_hull(hulls[i], hulls[j]) # this assumes the paths are convex hulls. I think it should be close enough but TODO might have problems here 
                     if res == 1: 
                         # hulls[i] in hulls[j] 
                         if root[i] == root[j]: 
@@ -535,12 +522,10 @@ def drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1,
 
 
     # outline 
-    # TODO: use satin stitch for thickness 
     starty += round(Height) # just to fix the calculations below, since the origin is somewhere else 
     if outline: 
         debug = [] 
         with te.running_stitch(30): # 99999 will make sure we won't have gaps 
-            #te.color(w_color) # TODO SWITCH COLOUR OF TEXT 
 
             def get_position(): 
                 posx, posy = te.position() 
@@ -736,12 +721,10 @@ def _debug_drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thick
 
 
     # outline 
-    # TODO: use satin stitch for thickness 
     starty += round(Height) # just to fix the calculations below, since the origin is somewhere else 
     if outline: 
         debug = [] 
         with te.running_stitch(30): # 99999 will make sure we won't have gaps 
-            #te.color(w_color) # TODO SWITCH COLOUR OF TEXT 
 
             def get_position(): 
                 posx, posy = te.position() 
@@ -851,6 +834,7 @@ def _debug_drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thick
 
 
 
+# FUNCTION TO HELP PARTIAL FILL ----------------------------------------------------------------------------------------------------
 
 def svg_to_pil(svgname) -> Image.Image : 
     # Convert svg to pdf in memory with svglib+reportlab
@@ -871,6 +855,7 @@ def svg_to_pil(svgname) -> Image.Image :
 
 import fast_tsp 
 def svg_get_lines(svgname, width:int, height:int, min_x_dist:int=10, min_y_dist:int=10): 
+    # this is actually, from an svg, getting the lines used to draw the partial fill. 
 
     image = svg_to_pil(svgname).resize((width, height)) 
     n = np.array(image) 
@@ -948,7 +933,6 @@ def svg_get_lines(svgname, width:int, height:int, min_x_dist:int=10, min_y_dist:
     
 
     # then, make a graph of all those nodes and tsp it 
-    # TODO potentially can also consider direction (horizontal/vertical) so double the amt of nodes 
 
     
     # now get adj matrix 
@@ -1027,6 +1011,11 @@ def svg_get_lines(svgname, width:int, height:int, min_x_dist:int=10, min_y_dist:
         lines.append((prev_pos, poss[tour[i]])) 
         prev_pos = poss[tour[i]] 
     return lines 
+
+
+
+# FUNCTIONS TO HELP FULL FILL -------------------------------------------------------------------------------------------------------------------------
+
 
 
 
