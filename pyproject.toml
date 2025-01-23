@@ -9,7 +9,7 @@ name = "turtlethread"
 keywords = [
     "turtlethread",
 ]
-version = "0.0.2"
+version = "0.2.1"
 description = "A Turtle-interface for making embroidery files"
 authors = [
     { name = "Wong Yue Heng, Tan Junheng and Yu Simu", email = "appventure@nushigh.edu.sg" },
@@ -31,14 +31,10 @@ classifiers = [
 ]
 dependencies = [
     "pyembroidery",
-    "matplotlib",
-    "scikit-learn",
     "opentypesvg",
-    "svglib",
-    "PyMuPDF",
     "beautifulsoup4",
+    "lxml",
     "fuzzywuzzy",
-    "fast-tsp",
     "typing_extensions ; python_version < \"3.11\"",
 ]
 
@@ -68,6 +64,12 @@ dev = [
     "pytest-randomly",
     "ruff==0.5.7",
 ]
+full = [
+    "pillow",
+    "svglib",
+    "PyMuPDF",
+    "fast-tsp",
+] 
 
 [tool.setuptools]
 include-package-data = true

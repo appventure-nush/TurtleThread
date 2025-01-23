@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from enum import Enum
 from warnings import warn
 
-from pyembroidery import write
+from pyembroidery import write, STITCH
 
 from . import stitches
 from . import fills
@@ -296,6 +296,7 @@ class Turtle(TNavigator):
 
             self._stitch_group_stack.append(stitch_group)
             self.pattern.stitch_groups.append(stitch_group)
+            
 
     def set_stitch_type(self, stitch_group):
         self._stitch_group_stack.append(stitch_group)
@@ -312,6 +313,16 @@ class Turtle(TNavigator):
                 + "\nYou should either set stitch groups with context managers or with the `start_{stitch_type}`"
                 + " methods, not both."
             )
+        
+        # Do fills!
+        if self.filling: 
+            for command in self._stitch_group_stack[-1].get_stitch_commands():
+                if command[2] == 0: # pyembroidery.STITCH
+                    self._fill_stitch_position_stack.append((command[0], command[1]))
+                elif command[2] == 1: # after the jump
+                    self._fill_stitch_position_stack.append((None, None)) # Indicates to reset
+
+
         self.cleanup_stitch_type()
 
     def running_stitch(self, stitch_length):
@@ -434,7 +445,6 @@ class Turtle(TNavigator):
         """Goto a given position, see the :py:meth:`goto` documentation for more info."""
         if self._stitch_group_stack:
             self._stitch_group_stack[-1].add_location(other)
-            if self.filling: self._fill_stitch_position_stack.append(other)
         self.x, self.y = other
 
     def save(self, filename):
@@ -483,39 +493,47 @@ class Turtle(TNavigator):
         bye : bool
             If True, then ``turtle.bye()`` will be called after drawing.
         """
-        visualise_pattern(
-            self.pattern.to_pyembroidery(),
-            turtle=turtle, width=width, height=height, scale=scale, speed=speed, trace_jump=trace_jump, done=done, bye=bye
-        )
+        try:
+            visualise_pattern(
+                self.pattern.to_pyembroidery(),
+                turtle=turtle, width=width, height=height, scale=scale, speed=speed, trace_jump=trace_jump, done=done, bye=bye
+            )
+        except Exception as e:
+            # Errors when you close the window! Yikes
+            pass
 
     def show_info(self):
         """Display information about this turtle's embroidery pattern."""
         show_info(self.pattern.to_pyembroidery(), scale=self.pattern.scale)
 
-    def begin_fill(self, mode):
+    def begin_fill(self, mode = fills.ScanlineFill(), closed=True):
         """After begin_fill is called, the turtle will track the stitches made until end_fill is called, afterwhich the polygon formed by the stitches will be filled.
         The current implementation of fill is limited to straight lines between points of the polygon. This works well for "straight" stitches like running stitch and
         satin stitch, but will not fill in the spaces formed in stitches such as zigzag stitch.
         
         Parameters
         ----------
-        mode : turtlethread.fills.Fill
+        mode : turtlethread.fills.Fill (optional, default = fills.ScanlineFill())
             The fill mode to use. Refer to the API reference for the possible fills.
+        closed : bool (optional, default=True)
+            Whether or not to automatically close the shape in the event it is not closed.
+            This must be set to False if jump stitches are used to create a fill with a hollowed part.
         """
         self.filling = True
         self.fill_mode = mode
+        self.fill_closed = closed
         fill_start_pos = self.pos()
         self._fill_stitch_position_stack = [fill_start_pos]
 
     def end_fill(self):
         """End the current fill, and draw the filled polygon."""
         self.filling = False
-
         # Close the polygon
-        if abs(self._fill_stitch_position_stack[0] - self._fill_stitch_position_stack[-1]) > 1:
+        if self.fill_closed and abs(self._fill_stitch_position_stack[0] - self._fill_stitch_position_stack[-1]) > 1:
             self._fill_stitch_position_stack.append(self._fill_stitch_position_stack[0])
         
         self.fill_mode.fill(self, self._fill_stitch_position_stack)
+
 
             
 

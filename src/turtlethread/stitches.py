@@ -5,7 +5,6 @@ import math
 from abc import ABC, abstractmethod
 from copy import copy
 from typing import Any, Generator, Iterable
-import warnings
 
 try:
     from typing import Literal, Self, TypeAlias

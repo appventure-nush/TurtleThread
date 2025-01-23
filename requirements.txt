@@ -28,5 +28,9 @@ opentypesvg
 beautifulsoup4 
 fuzzywuzzy 
 fast-tsp 
+svglib 
+reportlab 
+PyMuPDF
+matplotlib
 
 -e .
