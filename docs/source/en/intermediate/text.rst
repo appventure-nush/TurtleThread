@@ -129,6 +129,7 @@ code illustrates the three possibilities.
 **Partial fill**
     * When using partial fill, it is recommended to also outline the text. This is because the partial fill will look extremely messy without the outline to go with it. 
     * Note that partial fill is still partialy experimental, and might sometimes fill out of the boundaries of the character.
+    * Partial fill requires dependencies found only in the full version of TurtleThread.
 
 
 **Full fill**

@@ -13,7 +13,7 @@ If you are moving to TurtleThread from Python Turtle, take a look at the `interm
    :maxdepth: 2
    :caption: Contents:
    
-   installation
+   installation/installation
    intermediate/index
    stitches
    api/index

@@ -3,6 +3,11 @@
     --pst-color-link: 0,113,188;
 }
 
+:root, html[data-theme=dark] {
+
+    --pst-color-link: 0,153,255;
+}
+
 a {
     color: rgb(var(--pst-color-link));
     word-wrap: break-word;
@@ -45,6 +50,10 @@ div.admonition-prov-selv.admonition, div.admonition-try-it-yourself.admonition{
 
 div.admonition-prov-selv.admonition>.admonition-title, div.admonition-try-it-yourself.admonition>.admonition-title{
     background-color: rgba(40, 167, 70, 0.1);
+}
+
+img {
+    margin-bottom: 16px;
 }
 
 img.align-default, figure.align-default, .figure.align-default{
