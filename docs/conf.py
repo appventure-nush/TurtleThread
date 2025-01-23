@@ -121,7 +121,7 @@ html_favicon = "../logo/turtlethread_logo_notext.svg"
 # documentation.
 #
 
-languages = ["nb_NO", "en"]
+languages = ["en"]
 # other_languages = languages - {language}
 
 html_context = {"current_language": language, "all_languages": languages}

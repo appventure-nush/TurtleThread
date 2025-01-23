@@ -1,7 +1,7 @@
 import turtlethread 
 
 turtle = turtlethread.Turtle() 
-with turtlethread.LetterDrawer(te) as ld: 
+with turtlethread.LetterDrawer(turtle) as ld: 
     # We can use the letter drawer in this indented area 
     ld.load_font('Arial') 
     ld.load_font('Calibri') 

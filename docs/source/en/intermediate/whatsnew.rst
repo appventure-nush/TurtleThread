@@ -48,3 +48,26 @@ the specified location without leaving any stitches.
 However, it is strongly advised to limit the number of jump stitches in your embroidery pattern. This is because during
 embroidery, the embroidery machine has to temporarily pause embroidery and cut the thread, resulting in significant
 delays to the embroidery process.
+
+Exporting for Embroidery
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+The key purpose of TurtleThread is to allow for designs to be embroidered into reality. As such, knowing how to prepare 
+files for embroidery is essential.
+
+Firstly, ensure that you call the ``turtle.visualise()`` function. From the bottom of the interface, the estimated time
+for how long the pattern will take to embroider is displayed, as well as the number of stitches if you wish to 
+calculate the time needed for your embroidery machine.
+
+There will also be warnings if the stitches are too dense. If the warning for stitch density appears, do not proceed 
+with embroidery. The pattern may jam your machine and potentially break it.
+
+Next, use the ``turtle.save()`` function to export the pattern to a file format that your embroidery machine supports.
+The list of supported file formats is found in 
+`PyEmbroidery's README <https://github.com/EmbroidePy/pyembroidery?tab=readme-ov-file#file-io>`_.
+
+A brief example is given below.
+
+.. include-turtlethread:: whatsnew/eg_save.py
+    :linenos:
+    :emphasize-lines: 11
