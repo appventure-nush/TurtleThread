@@ -15,7 +15,9 @@ RUN apt-get update -y \
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY docs/ ./docs
+COPY logo/ ./logo
 WORKDIR /app/docs
+RUN make clean
 RUN make en
 
 FROM busybox:musl AS deploy
