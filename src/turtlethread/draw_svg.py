@@ -34,7 +34,10 @@ try:
     import numpy as np 
     import fast_tsp 
 
-    def svg_to_pil(svgname) -> Image.Image: 
+
+    # FUNCTION TO HELP PARTIAL FILL ----------------------------------------------------------------------------------------------------
+
+    def svg_to_pil(svgname) -> Image.Image : 
         # Convert svg to pdf in memory with svglib+reportlab
         # directly rendering to png does not support transparency nor scaling
         drawing = svglib.svg2rlg(path=svgname)
@@ -42,17 +45,21 @@ try:
 
         # Open pdf with fitz (pyMuPdf) to convert to PNG
         doc = fitz.Document(stream=pdf)
-        pix = doc.load_page(0).get_pixmap(alpha=True, dpi=24)
+        pix = doc.load_page(0).get_pixmap(alpha=True, dpi=300)
 
         with tempfile.NamedTemporaryFile(suffix='.png') as tmpf: 
             pix.save(tmpf.name)
+
             image = Image.open(tmpf.name) 
         #print("FINISHED SVG TO PIL")
-        return image 
-
+        return image
+    
     def svg_get_lines(svgname, width:int, height:int, min_x_dist:int=10, min_y_dist:int=10): 
+        # this is actually, from an svg, getting the lines used to draw the partial fill. 
+
         image = svg_to_pil(svgname).resize((width, height)) 
         n = np.array(image) 
+
         all_xs = [] 
 
         # identify regions 
@@ -98,6 +105,7 @@ try:
             r = min(r+min_x_dist, width-1) # distance 5 apart (0.5mm) is the mdefault
             
 
+
         # now, split each region into points within it 
         pts = {} # x: [ys] 
         psum_c = {} # x: [prefix summed consecutives]
@@ -125,8 +133,8 @@ try:
         
 
         # then, make a graph of all those nodes and tsp it 
-        # TODO potentially can also consider direction (horizontal/vertical) so double the amt of nodes 
 
+        
         # now get adj matrix 
         INF = 1000000 
         adjmat = [] 
@@ -186,6 +194,7 @@ try:
                     newrow[adjidx] = 1 
                 newrow[-1] = 0 # self 
                 adjmat.append(newrow)
+        
         #print("ADJMAT") 
         #print(np.array(adjmat))
         # adjmat gotten, now solve 
@@ -194,6 +203,7 @@ try:
         except Exception as e: 
             print("\n\n\nERROR GENERATING FILL PATH:\n")
             raise e 
+            
         # convert tour to path with poss 
         lines = [] 
         prev_pos = poss[tour[0]] 
@@ -201,105 +211,6 @@ try:
             lines.append((prev_pos, poss[tour[i]])) 
             prev_pos = poss[tour[i]] 
         return lines 
-
-
-
-    # stuff with convex hulls 
-    def get_hulls(w_attr, min_dist, filename, height, w_color=None, thickness=1, fill=True, outline=False, fill_min_y_dist:int=10, fill_min_x_dist=10, full_fill=True, flip_y_in:bool=False): 
-        hulls = [] 
-
-        # re-initialize 
-        global prev_turtle_pos 
-        global prev_end_pos 
-        global prev_stitch 
-        prev_turtle_pos = None 
-        prev_end_pos = None #"PREV END POS"
-        prev_stitch = None 
-
-        global flip_y 
-        real_flip_y = flip_y 
-        flip_y = False 
-
-        # run the whole outlining code with turtle identically, except we don't actually do it 
-        ttt = turtlethread.Turtle() 
-        _fake_drawSVG(ttt, filename, height, w_color, thickness, False, True, fill_min_y_dist, fill_min_x_dist, full_fill, flip_y_in, w_attr=w_attr)
-        hull = [] 
-        for x, y, _ in ttt.pattern.to_pyembroidery().stitches: 
-            hull.append([x,y])
-        
-        if len(hull)>1: 
-            hulls.append(hull) 
-
-        # reset to normal 
-        flip_y = real_flip_y 
-
-        return hulls # can be empty, which means no hull 
-
-
-    small_num = 1e-9
-    def which_is_inner_hull(h1, h2, recursed=False): 
-        #print("WHICH IS INNER HULL")
-        # pick 2 points from h2 to form a line 
-        pt1, pt2 = h2[:2] 
-
-        # get the x range 
-        h2xs = sorted([pt1[0], pt2[0]]) 
-
-        # y = mx + c 
-        m_2 = (pt2[1]-pt1[1])/(pt2[0]-pt1[0] + small_num) # dy / dx 
-        c_2 = pt1[1] - m_2*pt1[0] # c = y - mx 
-
-        left_sat = False 
-        right_sat = False 
-        
-        # now check every line segment in h1 and see if it intersects 
-        for i1 in range(len(h1)): 
-            i2 = (i1+1)%(len(h1)) 
-            # the line segment is i1 to i2 
-            m = (h1[i2][1]-h1[i1][1])/(h1[i2][0]-h1[i1][0] + small_num) # dy/dx 
-            c = h1[i1][1] - m*h1[i1][0] # c = y - mx 
-
-            # m x + c = m_2 x + c_2 => (m-m_2)x = c_2 - c => x = (c_2-c)/(m-m_2) 
-            reqx = (c_2-c)/(m-m_2 + small_num) 
-
-            # check if it's within max and min 
-            minx, maxx = sorted([h1[i1][0], h1[i2][0]]) 
-            if ((minx <= reqx) and (reqx <= maxx)): 
-                # FULFILLED --> INTERSECTED WITHIN --> LET'S SEE IF MORE OUTSIDE THAN THE PTS 
-                if ((h2xs[0] <= reqx) and (reqx <= h2xs[1])): 
-                    # INTERSECTED WITHIN IT 
-                    # SO H1 IS WITHIN H2 
-                    return 1 
-
-                # it's intersecting not within, in at one of the directions (so actl it might just be disjoint still)
-                if (reqx < h2xs[0]): 
-                    left_sat = True 
-                else: 
-                    right_sat = True 
-                
-                if (left_sat and right_sat): 
-                    return 2 # it's intersecting not within on both sides, so it must be h2 inside h1 
-        
-        # still inconclusive --> there's no way 2 is within 1 i guess 
-        if not recursed: # not using recursion to check again 
-            # let's check if 1 is within 2 
-            if which_is_inner_hull(h2, h1, recursed=True) == 2: # this means h1 is the inner one 
-                return 1 
-        
-        # if it's here because it's recursive, we don't need to care about possibility of 1 since we only care abt 2 
-        
-        return 0 # they're disjoint (if recursive, it can't be 2. if not recursive, it can neither be 1 nor 2.) 
-
-
-
-    def hull_is_clockwise(hull): # credits to https://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order 
-        s = 0 
-        for i in range(len(hull)): 
-            x1, y1 = hull[i] 
-            x2, y2 = hull[(i+1)%len(hull)] 
-            s += (x2-x1)*(y2+y1) 
-        
-        return s>0 # True is mostly clockwise, False is mostly anticlockwise 
 
 except:
     warnings.warn("PIL, PyMuPDF, svglib, reportlab, and/or numpy not installed - partial text fill will not work! Install the full version of TurtleThread to fix this.")
@@ -1061,192 +972,7 @@ def _fake_drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickn
     return 
 
 
-
-
-# FUNCTION TO HELP PARTIAL FILL ----------------------------------------------------------------------------------------------------
-
-def svg_to_pil(svgname) -> Image.Image : 
-    # Convert svg to pdf in memory with svglib+reportlab
-    # directly rendering to png does not support transparency nor scaling
-    drawing = svglib.svg2rlg(path=svgname)
-    pdf = renderPDF.drawToString(drawing)
-
-    # Open pdf with fitz (pyMuPdf) to convert to PNG
-    doc = fitz.Document(stream=pdf)
-    pix = doc.load_page(0).get_pixmap(alpha=True, dpi=300)
-
-    with tempfile.NamedTemporaryFile(suffix='.png') as tmpf: 
-        pix.save(tmpf.name)
-
-        image = Image.open(tmpf.name) 
-    #print("FINISHED SVG TO PIL")
-    return image 
-
-import fast_tsp 
-def svg_get_lines(svgname, width:int, height:int, min_x_dist:int=10, min_y_dist:int=10): 
-    # this is actually, from an svg, getting the lines used to draw the partial fill. 
-
-    image = svg_to_pil(svgname).resize((width, height)) 
-    n = np.array(image) 
-
-    all_xs = [] 
-
-    # identify regions 
-    r = 0 
-    regions = [] 
-    down = True # this is useless 
-    while r < width: 
-        all_xs.append(r) 
-        if down: 
-            prev = 0 
-            prev1 = -1 
-            for c in range(height): 
-                if n[c,r,3] > 0: # not transparent 
-                    if prev == 0: 
-                        prev1 = c 
-                    prev = 1 
-                else: 
-                    if prev == 1: # from non-transparent to transparent 
-                        regions.append([(r,prev1), (r,c-1)]) 
-                    prev = 0
-            if prev==1: # end of edge 
-                regions.append([(r,prev1), (r,c)]) 
-            down = False 
-        else: 
-            prev = height-1 
-            prev1 = height 
-            for c in range(height-1, 0, -1): 
-                if n[c,r,3] > 0: # not transparent 
-                    if prev == 0: 
-                        prev1 = c 
-                    prev = 1 
-                else: 
-                    if prev == 1: # from non-transparent to transparent 
-                        regions.append([(r,prev1), (r,c-1)]) 
-                    prev = 0
-            if prev==1: # end of edge 
-                regions.append([(r,prev1), (r,c)]) 
-            down = True 
-
-        if (r >= width-1): # this was the last one 
-            break 
-        
-        r = min(r+min_x_dist, width-1) # distance 5 apart (0.5mm) is the mdefault
-        
-
-
-    # now, split each region into points within it 
-    pts = {} # x: [ys] 
-    psum_c = {} # x: [prefix summed consecutives]
-    for xy0, xy1 in regions: 
-        x = xy0[0] 
-        yrange = sorted([xy0[1], xy1[1]]) 
-        n = yrange[1]-yrange[0] 
-        num = max(1, int(n//min_y_dist) ) # num+1 will be number of points 
-        d = 1 + (n%min_y_dist)/num
-        if x not in pts.keys(): 
-            pts[x] = [] 
-        
-        for i in range(num): 
-            pts[x].append(yrange[0]+i*d) 
-        pts[x].append(yrange[1]) 
-
-        if x not in psum_c.keys(): 
-            psum_c[x] = [num+1] 
-        else: 
-            psum_c[x].append(psum_c[x][-1] + num+1)
-    
-    xs = list(pts.keys()) 
-    for x in xs: 
-        pts[x].sort() 
-    
-
-    # then, make a graph of all those nodes and tsp it 
-
-    
-    # now get adj matrix 
-    INF = 1000000 
-    adjmat = [] 
-    nums = {} # (x,y) -> num 
-    poss = {} # num -> (x,y)
-    next_num = 0 
-
-    for xidx in range(len(xs)): 
-        x = xs[xidx]
-        cons_starts = psum_c[x] # doesn't include 0 but it'll throw error and except if 0 so it's fine 
-        cons_ends = [i-1 for i in cons_starts] 
-
-        allx_xidx = all_xs.index(x) 
-        for yidx in range(len(pts[x])): 
-            y = pts[x][yidx] 
-
-            #print((x,y), "NOT TRANSPARENT")
-            nums[(x, y)] = next_num 
-            poss[next_num] = (x,y) 
-            next_num += 1 
-
-            # get idxs of adjacent ones 
-            adjidxs = []
-            # try the 4 diff moves 
-            for dxp in range(-1,2): 
-                for dyp in range(-1, 2): 
-                    if (dyp==-1) and (yidx in cons_starts): continue 
-                    if (dyp==1) and (yidx in cons_ends): continue 
-                    new_allx_xidx = allx_xidx+dxp 
-
-                    if all_xs[new_allx_xidx] not in xs: continue # not side by side xs 
-                    try: 
-                        new_x = all_xs[new_allx_xidx]
-                        # try to find a y that's close enough 
-                        if dyp==-1: 
-                            for new_y in pts[new_x]: 
-                                if abs(y-new_y) < 2*min_y_dist: 
-                                    # consider it valid 
-                                    q = (new_x, new_y)
-                                    adjidxs.append(nums[q]) 
-                    except: 
-                        pass # it means doesnt exist 
-
-            # add to adjmat 
-            #print("ADJMAT")
-            #print(adjmat) 
-            #print("NEXT NUM:", next_num)
-            for i in range(next_num-1): 
-                if i in adjidxs: 
-                    # adjacent; dist is 1 
-                    adjmat[i].append(1) 
-                else: 
-                    adjmat[i].append(INF) 
-            
-            newrow = [INF for _ in range(next_num)] 
-            for adjidx in adjidxs: 
-                newrow[adjidx] = 1 
-            newrow[-1] = 0 # self 
-            adjmat.append(newrow)
-    
-    #print("ADJMAT") 
-    #print(np.array(adjmat))
-    # adjmat gotten, now solve 
-    try: 
-        tour = fast_tsp.find_tour(adjmat) 
-    except Exception as e: 
-        print("\n\n\nERROR GENERATING FILL PATH:\n")
-        raise e 
-        
-    # convert tour to path with poss 
-    lines = [] 
-    prev_pos = poss[tour[0]] 
-    for i in range(len(tour)-1): 
-        lines.append((prev_pos, poss[tour[i]])) 
-        prev_pos = poss[tour[i]] 
-    return lines 
-
-
-
 # FUNCTIONS TO HELP FULL FILL -------------------------------------------------------------------------------------------------------------------------
-
-
-
 
 # stuff with convex hulls 
 def get_hulls(w_attr, min_dist, filename, height, w_color=None, thickness=1, fill=True, outline=False, fill_min_y_dist:int=10, fill_min_x_dist=10, full_fill=True, flip_y_in:bool=False): 
