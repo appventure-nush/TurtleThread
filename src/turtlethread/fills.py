@@ -27,15 +27,22 @@ class ScanlineFill(Fill):
 
     Parameters
     ----------
-    angle:
+    angle: str | int | float (default="auto")
         Angle of the lines, in radians. May also be the string 'auto'.
-        If 'auto', the program will automatically try the angles of 0, 45, 90, and 135 degrees, to minimize the number of jump stitches."""
-    def __init__(self, angle : str | int | float = "auto"):
+        If 'auto', the program will automatically try the angles of 0, 45, 90, and 135 degrees, to minimize the number of jump stitches.
+    jump_at_edges: bool (default=False)
+        If True, the fill will do a jump stitch when it encounters an edge during fill, such as to cross from one area to another.
+        This creates a cleaner fill with less stray stitches.
+        Set to False by default as this may slow down embroidery significantly, due to the number of jump stitches involved.
+        """
+    
+    def __init__(self, angle : str | int | float = "auto", jump_at_edges : bool = False):
         if type(angle) == str and angle == "auto":
             self.auto = True
         else:
             self.auto = False
             self.angle = angle
+        self.jump_at_edges = jump_at_edges
             
     def _fill_at_angle(self, turtle, points, angle, simulate=False):
         # Rotate the coordinates
@@ -91,11 +98,7 @@ class ScanlineFill(Fill):
             if scanline_y > max_y and scanline_y - max_y < 3 - 0.3: # Subtract 0.3 to prevent infinite loop when scanline_y == max_y
                 scanline_y = max_y
 
-        
-        # Un-rotate the coordinates
-        for line in scanned_lines:
-            for i in range(len(line)):
-                line[i] = rotate_point(line[i][0], line[i][1], -angle)
+        # Coordinates are still unrotated!
 
         jump_stitches = 0
         # Jump to start coordinate if needed
@@ -103,27 +106,43 @@ class ScanlineFill(Fill):
         while len(scanned_lines[start_idx]) < 1:
             start_idx += 1
 
-        if abs(Vec2D(scanned_lines[start_idx][0][0], scanned_lines[start_idx][0][1]) - turtle.pos()) > 1:
+        start_pos_rot = rotate_point(scanned_lines[start_idx][0][0], scanned_lines[start_idx][0][1], -angle)
+
+        if abs(Vec2D(start_pos_rot[0], start_pos_rot[1]) - turtle.pos()) > 1:
             with turtle.jump_stitch():
                 jump_stitches += 1
-                if not simulate: turtle.goto(scanned_lines[start_idx][0])
+                if not simulate: turtle.goto(start_pos_rot)
 
         # Continuously loop through scanned lines until there is nothing left to fill
         no_fill_in_current_iteration_flag = False
         while not no_fill_in_current_iteration_flag:
             no_fill_in_current_iteration_flag = True
+            prev_line = None
             jump = False
             for i in range(start_idx, len(scanned_lines) - 1): # For each scanned line
                 with turtle.direct_stitch():
                     if len(scanned_lines[i]) >= 2: # If there are at least 2 coordinates, there needs to be a stitch between them!
-                        no_fill_in_current_iteration_flag = False
+                        no_fill_in_current_iteration_flag = False # Something was filled this iteration! For while loop to continue
+                        stitch_rot = (
+                            rotate_point(scanned_lines[i][0][0], scanned_lines[i][0][1], -angle), 
+                            rotate_point(scanned_lines[i][1][0], scanned_lines[i][1][1], -angle)
+                        )
+
+                        if self.jump_at_edges:
+                            # Check if the line will cross an edge, by seeing if previous stitch's left is 'lefter' than next stitch's right
+                            # Check similarly for right hand side
+                            if prev_line is not None and len(prev_line) >= 2:
+                                if prev_line[1][0] < scanned_lines[i][0][0] or prev_line[0][0] > scanned_lines[i][1][0]:
+                                    jump = True
+                            prev_line = (scanned_lines[i][0], scanned_lines[i][1])
+
                         if jump: # If there are gaps in the scanned lines, jump to the position of the first stitch
                             with turtle.jump_stitch():
-                                if not simulate: turtle.goto(scanned_lines[i][0])
+                                if not simulate: turtle.goto(stitch_rot[0])
                                 jump_stitches += 1
                                 jump = False
-                        if not simulate: turtle.goto(scanned_lines[i][0])
-                        if not simulate: turtle.goto(scanned_lines[i][1])
+                        if not simulate: turtle.goto(stitch_rot[0])
+                        if not simulate: turtle.goto(stitch_rot[1])
                         scanned_lines[i].pop(0)
                         scanned_lines[i].pop(0)
                     else:
