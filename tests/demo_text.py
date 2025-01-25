@@ -8,7 +8,7 @@ sys.path.insert(1, "./../src")
 import turtlethread 
 
 
-'''
+
 # draw_one_letter demo 
 print("draw_one_letter demo")
 te = turtlethread.Turtle() 
@@ -108,7 +108,7 @@ with turtlethread.LetterDrawer(te) as ld:
 
 #te.save(str(savedir / "fill_text.exp")) 
 te.visualise() 
-'''
+
 
 
 # TL;DR/example 

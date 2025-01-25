@@ -683,7 +683,7 @@ def drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1,
                     #print() 
                     
 
-                    fills.ScanlineFill("auto").fill(te, moved_pts) 
+                    fills.ScanlineFill("auto", True).fill(te, moved_pts) 
 
         else: 
             debug = [] 
