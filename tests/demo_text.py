@@ -8,7 +8,7 @@ sys.path.insert(1, "./../src")
 import turtlethread 
 
 
-
+'''
 # draw_one_letter demo 
 print("draw_one_letter demo")
 te = turtlethread.Turtle() 
@@ -106,9 +106,9 @@ with turtlethread.LetterDrawer(te) as ld:
     ld.draw_letter_gap(120) 
     ld.draw_one_letter('Arial', 'e', 120, outline=False, fill=True, full_fill=True) # full fill 
 
-te.save(str(savedir / "fill_text.exp")) 
+#te.save(str(savedir / "fill_text.exp")) 
 te.visualise() 
-
+'''
 
 
 # TL;DR/example 
@@ -136,29 +136,8 @@ with turtlethread.LetterDrawer(te) as ld:
 te.save(str(savedir / "example.exp")) 
 
 
-# small scale version to visualize 
-te = turtlethread.Turtle(scale=0.5) 
-with turtlethread.LetterDrawer(te) as ld: 
-    # we can use the letter drawer in this indented area 
-    ld.load_font('Arial') 
-    ld.load_font('Calibri') 
-    
-    # draw "TEXT" with different fonts 
-    ld.draw_one_letter('Arial', 'T', 120, fill=False, outline=True) 
-    ld.draw_letter_gap(120) # we must have a letter_gap if we're using ld.draw_one_letter 
-    ld.draw_string('Calibri', 'EX', 120, fills=False, outlines=True) # ld.draw_string handles letter_gaps inside 
-    ld.draw_letter_gap(120) 
-    ld.draw_one_letter('Arial', 'T', 120, fill=False, outline=True) 
-    
-    ld.draw_letter_gap(120) 
-    ld.draw_string('Arial', ' ', 120) 
-    ld.draw_letter_gap(120) 
-    
-    # fill types 
-    ld.draw_string('Arial', "SAM", 120, fills=True, outlines=False, full_fill=True) # full fill - best used without outline 
-    ld.draw_string("Arial", "PLE", 120, fills=True, outlines=True, full_fill=False) # partial fill - best used with outline 
-
+# visualize at small scale to see it fully 
 import turtle
 turtle.screensize(3000, 3000)
-te.visualise() 
+te.visualise(scale=0.5) 
 

@@ -11,7 +11,9 @@ flip_y = True
 # Time: 2018-08-09 18:27
 
 
+# these aren't actually used for debugging, but to help full fill. sorry for bad naming 
 debug = [] 
+save_to_debug = False 
 
 
 #import turtle 
@@ -224,16 +226,28 @@ K = 32
 
 import math 
 prev_turtle_pos = None 
-prev_end_pos = None #"PREV END POS"
+prev_end_pos = (0,0) #"PREV END POS"
 min_turtle_dist = 10 
 
 prev_stitch = None 
+
+def texcor(): 
+    return prev_end_pos[0] 
+def teycor(): 
+    if flip_y: 
+        return -prev_end_pos[1]
+    return prev_end_pos[1] 
+def teposition(): 
+    if flip_y: 
+        return (prev_end_pos[0], -prev_end_pos[1])
+    return prev_end_pos 
 
 
 def move_turtle_to(te:turtlethread.Turtle, x, y): 
     global prev_stitch 
     global prev_turtle_pos 
     global prev_end_pos 
+    global debug 
     #print("STITCH GROUP:", type(te._stitch_group_stack[-1])) 
     #print("(PREVIOUS: {})".format(str(prev_stitch_type))) 
     #print() 
@@ -267,6 +281,9 @@ def move_turtle_to(te:turtlethread.Turtle, x, y):
                 with te.use_stitch_group(prev_stitch): 
                     # then finish this up first before the jump stitch 
                     pex, pey = prev_end_pos 
+                    if save_to_debug: 
+                        debug.append((pex, pey))
+                    
                     if flip_y: 
                         te.goto(pex, -pey)
                     else: 
@@ -279,6 +296,8 @@ def move_turtle_to(te:turtlethread.Turtle, x, y):
     if isinstance(new_stitch, turtlethread.stitches.JumpStitch): 
         #print("JUMP STITCHING FROM {} TO {}".format(prev_turtle_pos, (x,y)))
         # if it's jump stitch then just go 
+        if save_to_debug: 
+            debug.append((None, None)) # this will signify a jump / switch hull
         if flip_y: 
             te.goto(x, -y) 
         else: 
@@ -295,15 +314,22 @@ def move_turtle_to(te:turtlethread.Turtle, x, y):
     mag = math.sqrt((xdiff)**2 + (ydiff)**2) # magnitude of difference vector 
     
     if ( mag >= min_turtle_dist): 
-        #print("DRAWING {} CONSIDERING MAG FROM {} TO {} MID STOP AT {}".format(new_stitch, prev_turtle_pos, (x,y), (currx + (min_turtle_dist/mag) * xdiff, (curry + (min_turtle_dist/mag) * ydiff) )))
-        # travel that distance first 
-        if flip_y: 
-            te.goto(currx + (min_turtle_dist/mag) * xdiff, - (curry + (min_turtle_dist/mag) * ydiff) ) 
 
-        else: 
-            te.goto(currx + (min_turtle_dist/mag) * xdiff, (curry + (min_turtle_dist/mag) * ydiff) ) 
+        pex, pey = prev_end_pos 
+        if (abs(pex-currx) > 1e-7) or (abs(pey-curry) > 1e-7): # we should finish up the previous thing first 
+            # different points, let's draw that first 
+            if save_to_debug: 
+                debug.append((pex, pey))
+            if flip_y: 
+                te.goto(pex, -pey) 
+
+            else: 
+                te.goto(pex, pey) 
+        
 
         # then travel the remaining distance 
+        if save_to_debug: 
+            debug.append((x, y)) 
         if flip_y: 
             te.goto(x, -y) 
         else: 
@@ -363,9 +389,9 @@ def Moveto_r(te, dx, dy):
     #te.penup()
     with te.jump_stitch(): 
         if flip_y: 
-            move_turtle_to(te, te.xcor() + dx, -te.ycor() - dy)
+            move_turtle_to(te, texcor() + dx, -teycor() - dy)
         else: 
-            move_turtle_to(te, te.xcor() + dx, te.ycor() - dy)
+            move_turtle_to(te, texcor() + dx, teycor() - dy)
     #te.pendown()
 
 
@@ -383,9 +409,9 @@ def Lineto_r(te, dx, dy):  # 连接当前点和相对坐标（dx，dy）的点
     #te.pendown()
     with te.running_stitch(30): 
         if flip_y: 
-            move_turtle_to(te, te.xcor() + dx, -te.ycor() - dy) 
+            move_turtle_to(te, texcor() + dx, -teycor() - dy) 
         else: 
-            move_turtle_to(te, te.xcor() + dx, te.ycor() - dy) 
+            move_turtle_to(te, texcor() + dx, teycor() - dy) 
     #te.penup()
 
 
@@ -398,11 +424,11 @@ def Lineto(te, startx, starty, x, y):  # 连接当前点和svg坐标下（x，y�
 
 def Curveto(te, startx, starty, x1, y1, x2, y2, x, y):  # 三阶贝塞尔曲线到（x，y）
     #te.penup()
-    X_now = te.xcor() - startx
+    X_now = texcor() - startx
     if flip_y: 
-        Y_now = starty + te.ycor() 
+        Y_now = starty + teycor() 
     else: 
-        Y_now = starty - te.ycor()
+        Y_now = starty - teycor()
     Bezier_3(te, startx, starty, X_now, Y_now, x1, y1, x2, y2, x, y)
     global Xh
     global Yh
@@ -412,11 +438,11 @@ def Curveto(te, startx, starty, x1, y1, x2, y2, x, y):  # 三阶贝塞尔曲线�
 
 def Curveto_r(te, startx, starty, x1, y1, x2, y2, x, y):  # 三阶贝塞尔曲线到相对坐标（x，y）
     #te.penup()
-    X_now = te.xcor() - startx 
+    X_now = texcor() - startx 
     if flip_y: 
-        Y_now = starty + te.ycor() 
+        Y_now = starty + teycor() 
     else: 
-        Y_now = starty - te.ycor()
+        Y_now = starty - teycor()
     Bezier_3(te, startx, starty, X_now, Y_now, X_now + x1, Y_now + y1,
              X_now + x2, Y_now + y2, X_now + x, Y_now + y)
     global Xh
@@ -508,6 +534,12 @@ def drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1,
     #turtle.screensize(Width, Height)
     #screen = turtle.Screen() 
 
+    # initialize 
+    global prev_end_pos 
+    global prev_stitch 
+    prev_end_pos = list(te.position()) #"PREV END POS"
+    prev_stitch = None 
+
 
     global debug 
     # if it's fill 
@@ -595,6 +627,10 @@ def drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1,
             if None in fill: 
                 print("ERROR: None in fill:", fill) 
                 raise ValueError("ERROR: NoneType in fill")
+            
+            # remove first and last points in each hull as they are out of place 
+            #for hidx in range(len(hulls)): 
+            #    hulls[hidx] = hulls[hidx][1:-1]
 
             # now combine the unfilled children with their filled parents 
             for fidx in range(len(fill)): 
@@ -605,7 +641,7 @@ def drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1,
                     child_pos = hulls[fidx][0] 
                     min_dist = -1 
                     best_idx = 0 
-                    for pidx in range(len(hulls[p])): 
+                    for pidx in range(len(hulls[p])-1): # to ensure that hulls[p][pidx+1] is valid too, just in case 
                         parent_pos = hulls[p][pidx]
                         dist = math.sqrt((child_pos[0]-parent_pos[0])**2 + (child_pos[1]-parent_pos[1])**2) 
                         if min_dist==-1 or dist<min_dist: 
@@ -615,33 +651,14 @@ def drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1,
                     parent_dirn = hull_is_clockwise(hulls[p]) 
                     child_dirn = hull_is_clockwise(hulls[fidx]) 
 
-                    # adjust child hull's points a bit based on direction 
-                    if child_dirn: 
-                        # clockwise - first half up, second half down 
-                        t = len(hulls[fidx])//2 
-                        hulls[p][best_idx][1] += 1 
-                        hulls[p][best_idx+1][1] -= 1 
-                        for i in range(t): 
-                            hulls[fidx][i][1] += 1 
-                        for i in range(t, len(hulls[fidx])): 
-                            hulls[fidx][i][1] -= 1 
-                    else: 
-                        # anticlockwise - first half down, second half up 
-                        t = len(hulls[fidx])//2 
-                        hulls[p][best_idx][1] -= 1 
-                        hulls[p][best_idx+1][1] += 1 
-                        for i in range(t): 
-                            hulls[fidx][i][1] -= 1 
-                        for i in range(t, len(hulls[fidx])): 
-                            hulls[fidx][i][1] += 1 
+                    
 
-
-                    if (parent_dirn ^ child_dirn):                     
+                    if (parent_dirn ^ child_dirn): 
                         # if opposite dirn, it works 
-                        hulls[p] = hulls[p][:best_idx] + hulls[fidx] + hulls[p][best_idx:] # add child's path to parent's path 
+                        hulls[p] = hulls[p][:best_idx+1] + [(None, None)] + hulls[fidx] + [(None, None)] + hulls[p][best_idx:] # add child's path to parent's path 
                     else: 
                         # if same dirn, need to reverse dirn to make it work 
-                        hulls[p] = hulls[p][:best_idx] + hulls[fidx][::-1] + hulls[p][best_idx:] # add child's path to parent's path 
+                        hulls[p] = hulls[p][:best_idx+1] + [(None, None)] + hulls[fidx][::-1] + [(None, None)] + hulls[p][best_idx:] # add child's path to parent's path 
 
 
 
@@ -650,20 +667,21 @@ def drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1,
                 if fill[fidx]: 
                     # print("FILLING HULL", fidx) 
                     # print(hulls[fidx]) 
-                    curr_pos = list(te.position())
+                    curr_pos = list(teposition())
                     moved_pts = [] 
                     for pt in hulls[fidx]: 
+                        if pt[0] is None: 
+                            moved_pts.append((None, None)) 
+                            continue 
                         if flip_y: 
                             moved_pts.append((pt[0]+curr_pos[0], -pt[1]+curr_pos[1]))
                         else: 
                             moved_pts.append((pt[0]+curr_pos[0], pt[1]+curr_pos[1]))
+                    moved_pts.append(moved_pts[0]) 
 
                     #print(moved_pts) 
                     #print() 
                     
-                    # remove first and last points, to avoid messing with scanlinefill 
-                    moved_pts.pop() 
-                    moved_pts.pop(0) 
 
                     fills.ScanlineFill("auto").fill(te, moved_pts) 
 
@@ -685,9 +703,7 @@ def drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1,
 
 
     # re-initialize 
-    global prev_end_pos 
-    global prev_stitch 
-    prev_end_pos = None #"PREV END POS"
+    prev_end_pos = list(te.position()) #"PREV END POS"
     prev_stitch = None 
 
 
@@ -701,7 +717,7 @@ def drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1,
             #te.color(w_color) # TODO SWITCH COLOUR OF TEXT 
 
             def get_position(): 
-                posx, posy = te.position() 
+                posx, posy = teposition() 
                 if flip_y: 
                     posy = -posy 
                 return posx-startx, -posy+starty 
@@ -710,7 +726,7 @@ def drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1,
 
             def set_firstpos(): 
                 nonlocal firstpos
-                firstpos = list(te.position())
+                firstpos = list(teposition())
                 if flip_y: 
                     firstpos[1] = -firstpos[1] 
                 firstpos[0] -= startx
@@ -747,19 +763,19 @@ def drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1,
                                 next(f) * scale[0], next(f) * scale[1])
                         lastI = i
                     elif i == 'Q': 
-                        X_now = te.xcor() #- startx
+                        X_now = texcor() #- startx
                         if flip_y: 
-                            Y_now = -te.ycor() #starty - te.ycor()
+                            Y_now = -teycor() #starty - teycor()
                         else: 
-                            Y_now = te.ycor() 
+                            Y_now = teycor() 
                         Bezier_2(te, X_now, Y_now, next(f) * scale[0] + startx, -next(f) * scale[1] + starty, 
                                 next(f) * scale[0] + startx, -next(f) * scale[1] + starty) 
                     elif i == 'q': 
-                        X_now = te.xcor() 
+                        X_now = texcor() 
                         if flip_y: 
-                            Y_now = -te.ycor() #starty - te.ycor()
+                            Y_now = -teycor() #starty - teycor()
                         else: 
-                            Y_now = te.ycor() 
+                            Y_now = teycor() 
                         Bezier_2(te, X_now, Y_now, X_now + next(f) * scale[0], Y_now - next(f) * scale[1], 
                                 X_now + next(f) * scale[0], Y_now - next(f) * scale[1],) 
                     elif i == 'L':
@@ -769,14 +785,14 @@ def drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1,
                         lastI = i
                     elif i == 'H': 
                         if flip_y: 
-                            Lineto(te, startx, starty, next(f) * scale[0], te.position()[1]+starty)
+                            Lineto(te, startx, starty, next(f) * scale[0], teposition()[1]+starty)
                         else: 
-                            Lineto(te, startx, starty, next(f) * scale[0], -te.position()[1]+starty)
+                            Lineto(te, startx, starty, next(f) * scale[0], -teposition()[1]+starty)
                     elif i == 'h':
                         Lineto_r(te, next(f) * scale[0], 0.0)
                         lastI = i
                     elif i == 'V': 
-                        Lineto(te, startx, starty, te.position()[0]-startx, next(f) * scale[1])
+                        Lineto(te, startx, starty, teposition()[0]-startx, next(f) * scale[1])
                     elif i == 'v':
                         Lineto_r(te, 0.0, next(f) * scale[1])
                         lastI = i
@@ -867,7 +883,7 @@ def _fake_drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickn
         with te.running_stitch(30): # 99999 will make sure we won't have gaps 
 
             def get_position(): 
-                posx, posy = te.position() 
+                posx, posy = teposition() 
                 if flip_y: 
                     posy = -posy 
                 return posx-startx, -posy+starty 
@@ -876,7 +892,7 @@ def _fake_drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickn
 
             def set_firstpos(): 
                 nonlocal firstpos
-                firstpos = list(te.position())
+                firstpos = list(teposition())
                 if flip_y: 
                     firstpos[1] = -firstpos[1] 
                 firstpos[0] -= startx
@@ -911,19 +927,19 @@ def _fake_drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickn
                             next(f) * scale[0], next(f) * scale[1])
                     lastI = i
                 elif i == 'Q': 
-                    X_now = te.xcor() #- startx
+                    X_now = texcor() #- startx
                     if flip_y: 
-                        Y_now = -te.ycor() #starty - te.ycor()
+                        Y_now = -teycor() #starty - teycor()
                     else: 
-                        Y_now = te.ycor() 
+                        Y_now = teycor() 
                     Bezier_2(te, X_now, Y_now, next(f) * scale[0] + startx, -next(f) * scale[1] + starty, 
                             next(f) * scale[0] + startx, -next(f) * scale[1] + starty) 
                 elif i == 'q': 
-                    X_now = te.xcor() 
+                    X_now = texcor() 
                     if flip_y: 
-                        Y_now = -te.ycor() #starty - te.ycor()
+                        Y_now = -teycor() #starty - teycor()
                     else: 
-                        Y_now = te.ycor() 
+                        Y_now = teycor() 
                     Bezier_2(te, X_now, Y_now, X_now + next(f) * scale[0], Y_now - next(f) * scale[1], 
                             X_now + next(f) * scale[0], Y_now - next(f) * scale[1],) 
                 elif i == 'L':
@@ -933,14 +949,14 @@ def _fake_drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickn
                     lastI = i
                 elif i == 'H': 
                     if flip_y: 
-                        Lineto(te, startx, starty, next(f) * scale[0], te.position()[1]+starty)
+                        Lineto(te, startx, starty, next(f) * scale[0], teposition()[1]+starty)
                     else: 
-                        Lineto(te, startx, starty, next(f) * scale[0], -te.position()[1]+starty)
+                        Lineto(te, startx, starty, next(f) * scale[0], -teposition()[1]+starty)
                 elif i == 'h':
                     Lineto_r(te, next(f) * scale[0], 0.0)
                     lastI = i
                 elif i == 'V': 
-                    Lineto(te, startx, starty, te.position()[0]-startx, next(f) * scale[1])
+                    Lineto(te, startx, starty, teposition()[0]-startx, next(f) * scale[1])
                 elif i == 'v':
                     Lineto_r(te, 0.0, next(f) * scale[1])
                     lastI = i
@@ -983,6 +999,7 @@ def get_hulls(w_attr, min_dist, filename, height, w_color=None, thickness=1, fil
     global prev_end_pos 
     global prev_stitch 
     prev_turtle_pos = None 
+    prev_prev_end_pos = prev_end_pos 
     prev_end_pos = None #"PREV END POS"
     prev_stitch = None 
 
@@ -992,10 +1009,21 @@ def get_hulls(w_attr, min_dist, filename, height, w_color=None, thickness=1, fil
 
     # run the whole outlining code with turtle identically, except we don't actually do it 
     ttt = turtlethread.Turtle() 
+    global debug 
+    global save_to_debug 
+    debug = [] 
+    save_to_debug = True 
     _fake_drawSVG(ttt, filename, height, w_color, thickness, False, True, fill_min_y_dist, fill_min_x_dist, full_fill, flip_y_in, w_attr=w_attr)
-    hull = [] 
-    for x, y, _ in ttt.pattern.to_pyembroidery().stitches: 
-        hull.append([x,y])
+    #hull = [] 
+    #for x, y, _ in ttt.pattern.to_pyembroidery().stitches: 
+    #    hull.append([x,y])
+    hull = [t for t in debug if t[0] is not None] 
+    hull.append(hull[0])
+    #print("HULL:", hull)
+    debug = [] 
+    save_to_debug = False 
+
+    #print("HULL:", hull)
     
     if len(hull)>1: 
         hulls.append(hull) 
@@ -1003,22 +1031,40 @@ def get_hulls(w_attr, min_dist, filename, height, w_color=None, thickness=1, fil
     # reset to normal 
     flip_y = real_flip_y 
 
+    prev_end_pos = prev_prev_end_pos
+
     return hulls # can be empty, which means no hull 
 
 
 
-small_num = 1e-9
+
+
+small_num = 1e-30
 def which_is_inner_hull(h1, h2, recursed=False): 
+    '''print()
+    print()
+    print("H1:", h1) 
+    print()
+    print("H2:", h2) 
+    print() 
+    print()''' 
     #print("WHICH IS INNER HULL")
     # pick 2 points from h2 to form a line 
-    pt1, pt2 = h2[:2] 
+    c_2 = 1e10
 
-    # get the x range 
-    h2xs = sorted([pt1[0], pt2[0]]) 
+    starti = 0 
+    while (abs(c_2) > 100) and (starti+2 <= len(h2)): 
+        pt1, pt2 = h2[starti:starti+2] 
 
-    # y = mx + c 
-    m_2 = (pt2[1]-pt1[1])/(pt2[0]-pt1[0] + small_num) # dy / dx 
-    c_2 = pt1[1] - m_2*pt1[0] # c = y - mx 
+        # get the x range 
+        h2xs = sorted([pt1[0], pt2[0]]) 
+
+        # y = mx + c 
+        m_2 = (pt2[1]-pt1[1])/(pt2[0]-pt1[0] + small_num) # dy / dx 
+        c_2 = pt1[1] - m_2*pt1[0] # c = y - mx 
+
+        starti += 1 
+
 
     left_sat = False 
     right_sat = False 
@@ -1035,9 +1081,10 @@ def which_is_inner_hull(h1, h2, recursed=False):
 
         # check if it's within max and min 
         minx, maxx = sorted([h1[i1][0], h1[i2][0]]) 
-        if ((minx <= reqx) and (reqx <= maxx)): 
+        #print(minx, reqx, maxx)
+        if ((minx-small_num <= reqx) and (reqx-small_num <= maxx)): 
             # FULFILLED --> INTERSECTED WITHIN --> LET'S SEE IF MORE OUTSIDE THAN THE PTS 
-            if ((h2xs[0] <= reqx) and (reqx <= h2xs[1])): 
+            if ((h2xs[0]-small_num <= reqx) and (reqx-small_num <= h2xs[1])): 
                 # INTERSECTED WITHIN IT 
                 # SO H1 IS WITHIN H2 
                 return 1 
