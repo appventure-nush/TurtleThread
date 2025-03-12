@@ -76,12 +76,14 @@ class Turtle(TNavigator):
 
     """
 
-    def __init__(self, pattern=None, scale=1, angle_mode="degrees", mode=TNavigator.DEFAULT_MODE):
+    def __init__(self, pattern=None, scale=1, angle_mode="degrees", mode=TNavigator.DEFAULT_MODE, colour='black'):
         # TODO: Flag that can enable/disable changing angle when angle mode is changed
         if pattern is None:
             self.pattern = stitches.EmbroideryPattern(scale=scale)
         else:
             self.pattern = pattern
+
+        self.curr_colour = colour 
 
         # Set up stitch parameters prior to super.__init__ since self.reset() depends on stitch type
         self._stitch_group_stack = []
@@ -196,7 +198,7 @@ class Turtle(TNavigator):
         stitch_length : int
             Number of steps between each stitch.
         """
-        self.set_stitch_type(stitches.RunningStitch(self.pos(), stitch_length))
+        self.set_stitch_type(stitches.RunningStitch(self.pos(), self.curr_colour, stitch_length))
 
     def start_triple_stitch(self, stitch_length):
         """Set the stitch mode to triple stitch (not recommended, use ``triple_stitch``-context instead).
@@ -210,14 +212,14 @@ class Turtle(TNavigator):
         stitch_length : int
             Number of steps between each stitch.
         """
-        self.set_stitch_type(stitches.TripleStitch(self.pos(), stitch_length))
+        self.set_stitch_type(stitches.TripleStitch(self.pos(), self.curr_colour, stitch_length))
 
     def start_jump_stitch(self):
         """Set the stitch mode to jump-stitch (not recommended, use ``jump_stitch``-context instead).
 
         With a jump-stitch, trim the thread and move the needle without sewing more stitches.
         """
-        self.set_stitch_type(stitches.JumpStitch(self.pos()))
+        self.set_stitch_type(stitches.JumpStitch(self.pos())) # no need colour for jump stitches 
 
     def start_zigzag_stitch(
         self,
@@ -231,6 +233,7 @@ class Turtle(TNavigator):
         
         self.set_stitch_type(stitches.ZigzagStitch(
             self.pos(),
+            self.curr_colour, 
             stitch_length,
             stitch_width,
             center=center,
@@ -241,7 +244,7 @@ class Turtle(TNavigator):
 
     def start_satin_stitch(self, width, center = True):
         """Set the stitch mode to satin stitch.""" 
-        self.set_stitch_type(stitches.SatinStitch(self.pos(), width, center=center))
+        self.set_stitch_type(stitches.SatinStitch(self.pos(), self.curr_colour, width, center=center))
 
     def start_cross_stitch(
         self,
@@ -255,6 +258,7 @@ class Turtle(TNavigator):
         
         self.set_stitch_type(stitches.CrossStitch(
             self.pos(),
+            self.curr_colour, 
             stitch_length,
             stitch_width,
             center=center,
@@ -275,6 +279,7 @@ class Turtle(TNavigator):
         
         self.set_stitch_type(stitches.ZStitch(
             self.pos(),
+            self.curr_colour, 
             stitch_length,
             stitch_width,
             center=center,
@@ -338,7 +343,7 @@ class Turtle(TNavigator):
         stitch_length : int
             Number of steps between each stitch.
         """
-        return self.use_stitch_group(stitches.RunningStitch(self.pos(), stitch_length))
+        return self.use_stitch_group(stitches.RunningStitch(self.pos(), self.curr_colour, stitch_length))
 
     def triple_stitch(self, stitch_length):
         """Set the stitch mode to triple stitch and cleanup afterwards.
@@ -352,7 +357,7 @@ class Turtle(TNavigator):
         stitch_length : int
             Number of steps between each stitch.
         """
-        return self.use_stitch_group(stitches.TripleStitch(self.pos(), stitch_length))
+        return self.use_stitch_group(stitches.TripleStitch(self.pos(), self.curr_colour, stitch_length))
 
     def jump_stitch(self, skip_intermediate_jumps=True):
         """Set the stitch mode to jump-stitch and cleanup afterwards.
@@ -380,6 +385,7 @@ class Turtle(TNavigator):
         
         return self.use_stitch_group(stitches.ZigzagStitch(
             self.pos(),
+            self.curr_colour, 
             stitch_length,
             stitch_width,
             center=center,
@@ -390,7 +396,7 @@ class Turtle(TNavigator):
 
     def satin_stitch(self, width, center = True):
         """Set the stitch mode to satin stitch.""" 
-        return self.use_stitch_group(stitches.SatinStitch(self.pos(), width, center=center))
+        return self.use_stitch_group(stitches.SatinStitch(self.pos(), self.curr_colour, width, center=center))
 
     
     def cross_stitch(
@@ -405,6 +411,7 @@ class Turtle(TNavigator):
         
         return self.use_stitch_group(stitches.CrossStitch(
             self.pos(),
+            self.curr_colour, 
             stitch_length,
             stitch_width,
             center=center,
@@ -425,6 +432,7 @@ class Turtle(TNavigator):
         
         return self.use_stitch_group(stitches.ZStitch(
             self.pos(),
+            self.curr_colour, 
             stitch_length,
             stitch_width,
             center=center,
@@ -434,7 +442,7 @@ class Turtle(TNavigator):
         ))
 
     def direct_stitch(self):
-        return self.use_stitch_group(stitches.DirectStitch(self.pos()))
+        return self.use_stitch_group(stitches.DirectStitch(self.pos(), self.curr_colour))
 
     @property
     def _position(self):
@@ -447,7 +455,7 @@ class Turtle(TNavigator):
             self._stitch_group_stack[-1].add_location(other)
         self.x, self.y = other
 
-    def save(self, filename):
+    def save(self, filename, colour_inf_filename=None):
         """Save the embroidery pattern as an embroidery or image file.
 
         Saves the embroiery pattern to file. Supports standard embroidery file formats,
@@ -459,9 +467,16 @@ class Turtle(TNavigator):
         filename : str
         """
         if not USE_SPHINX_GALLERY:
-            write(self.pattern.to_pyembroidery(), filename)
+            pyemb = self.pattern.to_pyembroidery() 
+            write(pyemb, filename)
+            if colour_inf_filename: 
+                write(pyemb, colour_inf_filename)
         else:
             self._gallery_patterns.append((filename, self.pattern.to_pyembroidery()))
+            if colour_inf_filename: 
+                raise Exception("Cannot write to .inf file if using SPHINX gallery!") 
+        
+        
 
     def home(self):
         """Move the needle home (position (0, 0)), for more info see the official :py:func:`turtle.home` documentation"""
@@ -535,6 +550,7 @@ class Turtle(TNavigator):
         self.fill_mode.fill(self, self._fill_stitch_position_stack)
 
 
-            
+    def set_colour(self, newcol:str): 
+        self.curr_colour = newcol 
 
 
