@@ -40,7 +40,7 @@ class EmbroideryPattern:
         pattern = pyembroidery.EmbPattern()
         for stitch_group in self.stitch_groups:
             if (not isinstance(stitch_group, JumpStitch)): 
-                pattern += stitch_group.colour 
+                pattern += stitch_group.color 
 
             scaled_stitch_commands = (
                 (x * self.scale, y * self.scale, cmd) for x, y, cmd in stitch_group.get_stitch_commands()
@@ -74,12 +74,12 @@ class StitchGroup(ABC):
         The initial position of the turtle.
     """
 
-    def __init__(self, start_pos: Vec2D, colour: str) -> None:
+    def __init__(self, start_pos: Vec2D, color: str) -> None:
         self._start_pos = start_pos
         self._positions = []
         self._stitch_commands = None
         self._parent_stitch_group = self
-        self.colour = colour 
+        self.color = color 
 
     def add_location(self, location: Vec2D) -> None:
         """Add a new location to this stitch group."""
@@ -149,13 +149,13 @@ class UnitStitch(StitchGroup):
     def __init__(
         self, 
         start_pos: Vec2D, 
-        colour:str, 
+        color:str, 
         stitch_length: int | float, 
         auto_adjust: bool = True, 
         enforce_end_stitch: bool = True, 
         enforce_start_stitch: bool = True, ) -> None:
 
-        super().__init__(start_pos=start_pos, colour=colour)
+        super().__init__(start_pos=start_pos, color=color)
         self.stitch_length = stitch_length
         self.auto_adjust = auto_adjust
         self.enforce_end_stitch = enforce_end_stitch
@@ -321,8 +321,8 @@ class RunningStitch(StitchGroup):
         Number of steps between each stitch.
     """
 
-    def __init__(self, start_pos: Vec2D, colour:str, stitch_length: int | float) -> None:
-        super().__init__(start_pos=start_pos, colour=colour)
+    def __init__(self, start_pos: Vec2D, color:str, stitch_length: int | float) -> None:
+        super().__init__(start_pos=start_pos, color=color)
 
         self.stitch_length = stitch_length
 
@@ -415,8 +415,8 @@ class TripleStitch(StitchGroup):
         Number of steps between each stitch.
     """
 
-    def __init__(self, start_pos: Vec2D, colour: str, stitch_length: float) -> None:
-        super().__init__(start_pos=start_pos, colour=colour)
+    def __init__(self, start_pos: Vec2D, color: str, stitch_length: float) -> None:
+        super().__init__(start_pos=start_pos, color=color)
         self.running_stitch = RunningStitch(start_pos=start_pos, stitch_length=stitch_length)
 
     def _get_stitch_commands(self) -> list[tuple[float, float, StitchCommand]]:
@@ -441,8 +441,8 @@ class JumpStitch(StitchGroup):
         make sense but it can happen dependent on how you generate your patterns.
     """
 
-    def __init__(self, start_pos: Vec2D, colour:str=None, skip_intermediate_jumps: bool = True) -> None:
-        super().__init__(start_pos=start_pos, colour=colour) 
+    def __init__(self, start_pos: Vec2D, color:str=None, skip_intermediate_jumps: bool = True) -> None:
+        super().__init__(start_pos=start_pos, color=color) 
         self.skip_intermediate_jumps = skip_intermediate_jumps
 
     def _get_stitch_commands(self) -> list[tuple[float, float, StitchCommand]]:
@@ -463,7 +463,7 @@ class ZigzagStitch(UnitStitch):
     def __init__(
         self,
         start_pos: Vec2D,
-        colour: str, 
+        color: str, 
         stitch_length: int | float,
         stitch_width: int | float,
         center: bool = False,
@@ -473,7 +473,7 @@ class ZigzagStitch(UnitStitch):
         
         super().__init__(
             start_pos=start_pos,
-            colour=colour, 
+            color=color, 
             stitch_length=stitch_length,
             auto_adjust=auto_adjust,
             enforce_end_stitch=enforce_end_stitch,
@@ -573,14 +573,14 @@ class SatinStitch(ZigzagStitch):
     A satin stitch is simply a zigzag stitch with a tight density. This creates a solid fill.
     We use 0.3mm for the density."""
     
-    def __init__(self, start_pos: Vec2D, colour: str, stitch_width: int | float, center: bool = True) -> None:
-        super().__init__(start_pos=start_pos, colour=colour, stitch_width=stitch_width, stitch_length=3, center=center)
+    def __init__(self, start_pos: Vec2D, color: str, stitch_width: int | float, center: bool = True) -> None:
+        super().__init__(start_pos=start_pos, color=color, stitch_width=stitch_width, stitch_length=3, center=center)
     
 class CrossStitch(UnitStitch):
     def __init__(
         self,
         start_pos: Vec2D,
-        colour: str, 
+        color: str, 
         stitch_length: int | float,
         stitch_width: int | float,
         center: bool = False,
@@ -590,7 +590,7 @@ class CrossStitch(UnitStitch):
         
         super().__init__(
             start_pos=start_pos,
-            colour=colour, 
+            color=color, 
             stitch_length=stitch_length,
             auto_adjust=auto_adjust,
             enforce_end_stitch=enforce_end_stitch,
@@ -659,7 +659,7 @@ class ZStitch(UnitStitch):
     def __init__(
         self,
         start_pos: Vec2D,
-        colour: str, 
+        color: str, 
         stitch_length: int | float,
         stitch_width: int | float,
         center: bool = False,
@@ -669,7 +669,7 @@ class ZStitch(UnitStitch):
         
         super().__init__(
             start_pos=start_pos,
-            colour=colour, 
+            color=color, 
             stitch_length=stitch_length,
             auto_adjust=auto_adjust,
             enforce_end_stitch=enforce_end_stitch,
