@@ -157,6 +157,9 @@ class UnitStitch(StitchGroup):
         self.enforce_start_stitch = enforce_start_stitch
 
         self.stitch_stop_multiplier = 0
+        self.x = start_pos[0]
+        self.y = start_pos[1]
+        self.distance_traveled = 0
 
     @classmethod
     def round_stitch_length(cls, stitch_length : int | float, distance : int | float):
@@ -194,7 +197,7 @@ class UnitStitch(StitchGroup):
         stitch_length: float
             The stitch length of the stitch.
         """
-        pass
+        return iter(())
         
     def _stitch_unit(self, start_pos: Vec2D, angle: float, stitch_length: float) -> list[tuple[float, float, StitchCommand]]:
         """Stitch a single unit. To be implemented by children.
@@ -232,7 +235,7 @@ class UnitStitch(StitchGroup):
         distance: float
             The distance to the end position.
         """
-        pass
+        return iter(()) # Return an empty iterator as a sane default
     
     def _iter_stitches_between_positions(
         self, position_1: Vec2D, position_2: Vec2D
@@ -264,16 +267,17 @@ class UnitStitch(StitchGroup):
         y = self.y
         distance_traveled = self.distance_traveled
 
-        # Repeat until stich_stop_multiplier*stitch_length away
-        while distance_traveled + stitch_length*self.stitch_stop_multiplier < distance:
+        # Repeat until stitch_stop_multiplier*stitch_length away
+        # NOTE: If stitch_stop_multiplier is 0, the stitch length will be a multiple of the distance so we can stop on the end point itself
+        while (self.stitch_stop_multiplier == 0 and distance_traveled + stitch_length*self.stitch_stop_multiplier < distance) or (self.stitch_stop_multiplier > 0 and distance_traveled + stitch_length*self.stitch_stop_multiplier <= distance):
             for stitch in self._stitch_unit(Vec2D(x, y), angle, stitch_length): yield stitch
             x += stitch_length * dx
             y += stitch_length * dy
             distance_traveled += stitch_length
 
         # Do not do end stitches if the unit stitch reaches the final destination
-        if distance_traveled < distance and self.enforce_end_stitch:
- 
+        print(distance_traveled, distance)
+        if (distance_traveled < distance or (math.isclose(distance_traveled, distance, rel_tol=0.001))) and self.enforce_end_stitch:
             self.x = x
             self.y = y
             self.distance_traveled = distance_traveled
@@ -454,6 +458,7 @@ class JumpStitch(StitchGroup):
             stitch_commands.append((x, y, pyembroidery.JUMP))
         return stitch_commands
 
+
 class ZigzagStitch(UnitStitch):
     def __init__(
         self,
@@ -475,11 +480,11 @@ class ZigzagStitch(UnitStitch):
 
         self.center = center
         self.stitch_width = stitch_width
-
-        if self.center:
-            self.stitch_stop_multiplier = 1
-        else:
-            self.stitch_stop_multiplier = 0
+        self.stitch_stop_multiplier = 1 # Apparently if you use the <= operator in the while loop in the iter part it works without if?
+        # if self.center:
+        #     self.stitch_stop_multiplier = 1
+        # else:
+        #     self.stitch_stop_multiplier = 1
 
     def _stitch_unit(self, start_pos: Vec2D, angle: float, stitch_length: float) -> list[tuple[float, float, StitchCommand]]:
         """Stitch a single zigzag. We stitch right, then left.
@@ -561,6 +566,7 @@ class ZigzagStitch(UnitStitch):
                 # # Do not yield a stitch at the end position
                 pass
 
+
 class SatinStitch(ZigzagStitch):
     """Stitch group for satin stitches.
     A satin stitch is simply a zigzag stitch with a tight density. This creates a solid fill.
@@ -569,6 +575,7 @@ class SatinStitch(ZigzagStitch):
     def __init__(self, start_pos: Vec2D, stitch_width: int | float, center: bool = True) -> None:
         super().__init__(start_pos=start_pos, stitch_width=stitch_width, stitch_length=3, center=center)
     
+
 class CrossStitch(UnitStitch):
     def __init__(
         self,
@@ -591,7 +598,10 @@ class CrossStitch(UnitStitch):
         self.center = center
         self.stitch_width = stitch_width
 
-        self.stitch_stop_multiplier = 0
+        if auto_adjust:
+            self.stitch_stop_multiplier = 0
+        else:
+            self.stitch_stop_multiplier = 1
     def _stitch_unit(self, start_pos: Vec2D, angle: float, stitch_length: float) -> list[tuple[float, float, StitchCommand]]:
         """The cross stitch is implemented by going from the top left corner to the bottom right corner, then moving
         from the bottom right to the bottom left, before finally going to the top right corner. This corner will
@@ -668,10 +678,7 @@ class ZStitch(UnitStitch):
         self.center = center
         self.stitch_width = stitch_width
 
-        if self.center:
-            self.stitch_stop_multiplier = 1
-        else:
-            self.stitch_stop_multiplier = 0
+        self.stitch_stop_multiplier = 1
 
     def _stitch_unit(self, start_pos: Vec2D, angle: float, stitch_length: float) -> list[tuple[float, float, StitchCommand]]:
         """In Z-stitch, we stitch forward by stitch_length and right by stitch_width, then back left by stitch_width."""
@@ -712,7 +719,7 @@ class ZStitch(UnitStitch):
     def _end_stitch_unit(self, start_pos: Vec2D, angle: float, stitch_length: float, distance: float) -> list[tuple[float, float, StitchCommand]]:
         """If center, we need to have half a diagonal stitch to return to the original position along the direction of travel."""
         # Since the final stitch is automatically drawn, we do not need to do anything
-        pass
+        return iter(())
 
 
 class DirectStitch(StitchGroup):
