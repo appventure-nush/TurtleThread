@@ -51,7 +51,7 @@ class ScanlineFill(Fill):
             x_rot, y_rot = rotate_point(x, y, angle)
             rot_points.append((x_rot, y_rot))
 
-        # Basic scanline fill implementation
+        # Find bounding box of polygon
         edges = []
         min_x = rot_points[0][0]
         max_x = rot_points[0][0]
@@ -59,6 +59,7 @@ class ScanlineFill(Fill):
         max_y = rot_points[0][1]
 
         # Find all edges/segments that make up outline
+        # After this, edges should be a list of ((x1, y1), (x2, y2)) tuples
         for i in range(len(rot_points) - 1):
             # If points is (None, None) ignore that edge! This separates different parts of the polygon.
             if rot_points[i][0] is None or rot_points[i + 1][0] is None:
@@ -69,9 +70,18 @@ class ScanlineFill(Fill):
             min_y = min(min_y, rot_points[i + 1][1])
             max_y = max(max_y, rot_points[i + 1][1])
 
+        # Remove edges where p1 == p2
+        edges_cleaned = []
+        for edge in edges:
+            if not (abs(edge[1][0] - edge[0][0]) < 1 and abs(edge[1][1] - edge[0][1]) < 1): 
+                edges_cleaned.append(edge)
+        edges = edges_cleaned
+
+
         # Sweep from +y to -y, populating a list of horizontal intersections at each y scanline
         scanned_lines = []
         scanline_y = min_y
+        
         while scanline_y <= max_y:
             intersections = []
             for edge in edges:
@@ -83,8 +93,10 @@ class ScanlineFill(Fill):
                     elif abs(edge[1][0] - edge[0][0]) < 1: # x is equal, hence vertical edge
                         intersections.append((edge[0][0], scanline_y))
                     elif abs(edge[1][1] - edge[0][1]) < 1: # y is equal, hence horizontal edge
-                        intersections.append((edge[0][0], scanline_y))
-                        intersections.append((edge[1][0], scanline_y))
+                        # We don't actually need to care about horiontal edges...?
+                        continue
+                        # intersections.append((edge[0][0], scanline_y))
+                        # intersections.append((edge[1][0], scanline_y))
                     
 
             intersections.sort(key=lambda x: x[0])
@@ -152,7 +164,6 @@ class ScanlineFill(Fill):
     
     def fill(self, turtle, points):
         assert len(points)>0, "'points' cannot be an empty list! (in ScanlineFill)"
-
         if not self.auto:
             self._fill_at_angle(turtle, points, self.angle)
         else:

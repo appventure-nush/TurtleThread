@@ -102,6 +102,7 @@ class StitchGroup(ABC):
         copied_group = copy(self)
         copied_group._positions = []
         copied_group._start_pos = start_pos
+        copied_group._stitch_commands = None
         copied_group._parent_stitch_group = self._parent_stitch_group
         copied_group.color = self.color
 

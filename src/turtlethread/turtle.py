@@ -288,8 +288,18 @@ class Turtle(TNavigator):
             enforce_start_stitch=enforce_start_stitch
         ))
 
+    def start_direct_stitch(self):
+        self.set_stitch_type(stitches.DirectStitch(self.pos()))
+
     def cleanup_stitch_type(self):
         """Cleanup after switching stitch type."""
+        if self.filling: 
+            for command in self._stitch_group_stack[-1].get_stitch_commands():
+                if command[2] == 0: # pyembroidery.STITCH
+                    self._fill_stitch_position_stack.append((command[0], command[1]))
+                elif command[2] == 1: # after the jump
+                    self._fill_stitch_position_stack.append((None, None)) # Indicates to reset
+
         self._stitch_group_stack.pop()
         if self._stitch_group_stack:
             # This handles nested context managers. We remove the top stitch group
@@ -318,15 +328,6 @@ class Turtle(TNavigator):
                 + "\nYou should either set stitch groups with context managers or with the `start_{stitch_type}`"
                 + " methods, not both."
             )
-        
-        # Do fills!
-        if self.filling: 
-            for command in self._stitch_group_stack[-1].get_stitch_commands():
-                if command[2] == 0: # pyembroidery.STITCH
-                    self._fill_stitch_position_stack.append((command[0], command[1]))
-                elif command[2] == 1: # after the jump
-                    self._fill_stitch_position_stack.append((None, None)) # Indicates to reset
-
 
         self.cleanup_stitch_type()
 
@@ -545,12 +546,23 @@ class Turtle(TNavigator):
 
     def end_fill(self):
         """End the current fill, and draw the filled polygon."""
-        self.filling = False
-        # Close the polygon
-        if self.fill_closed and abs(self._fill_stitch_position_stack[0] - self._fill_stitch_position_stack[-1]) > 1:
-            self._fill_stitch_position_stack.append(self._fill_stitch_position_stack[0])
-        
-        self.fill_mode.fill(self, self._fill_stitch_position_stack)
+        if self.filling:
+            self.filling = False
+            temp_fill_stack = self._fill_stitch_position_stack.copy()
+
+            if len(self._stitch_group_stack) > 0:
+                # Add everything from current stack
+                for command in self._stitch_group_stack[-1].get_stitch_commands():
+                    if command[2] == 0: # pyembroidery.STITCH
+                        temp_fill_stack.append((command[0], command[1]))
+                    elif command[2] == 1: # after the jump
+                        temp_fill_stack.append((None, None)) # Indicates to reset
+
+            # Close the polygon
+            if self.fill_closed and abs(temp_fill_stack[0] - temp_fill_stack[-1]) > 1:
+                temp_fill_stack.append(temp_fill_stack[0])
+            
+            self.fill_mode.fill(self, temp_fill_stack)
 
 
     def color(self, newcol: str): 
