@@ -555,11 +555,12 @@ class Turtle(TNavigator):
 
     def color(self, newcol: str): 
         # We need to change the stitch group so that the color change is reflected!
-        previous_stitch_group = self._stitch_group_stack.pop()
-        stitch_group = previous_stitch_group.empty_copy(self.position())
-        stitch_group.color = newcol
-        self._stitch_group_stack.append(stitch_group)
-        self.pattern.stitch_groups.append(stitch_group)
+        if self._stitch_group_stack:
+            previous_stitch_group = self._stitch_group_stack.pop()
+            stitch_group = previous_stitch_group.empty_copy(self.position())
+            stitch_group.color = newcol
+            self._stitch_group_stack.append(stitch_group)
+            self.pattern.stitch_groups.append(stitch_group)
         self.curr_color = newcol 
 
 

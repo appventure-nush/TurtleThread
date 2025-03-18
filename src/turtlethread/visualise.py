@@ -211,6 +211,8 @@ def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, spee
     turtle.pendown()
 
     raise_error = False
+    threads = list(pattern.threadlist)
+    thread_idx = 0
     for x, y, command in pattern.stitches:
         x = scale * x
         y = scale * y
@@ -232,7 +234,10 @@ def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, spee
             centered_cross(turtle, 10 * scale)
         elif command == STITCH:
             turtle.setheading(turtle.towards(x, -y))
-            turtle.color("blue")
+            if len(threads) > 0:
+                turtle.color(threads[thread_idx].hex_color())
+            else:
+                turtle.color("blue")
 
             #  20%  60%   20%
             # blank line blank
@@ -253,7 +258,7 @@ def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, spee
             turtle.pendown()
             turtle.width(w)
         elif command == COLOR_CHANGE:
-            print('color change')
+            thread_idx += 1
 
         else:
             raise_error = True
