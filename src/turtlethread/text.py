@@ -192,7 +192,6 @@ class LetterDrawer():
         # this draws the gap between two letters (not whitespace) 
         with self.turtle.jump_stitch(): 
             currpos = list(self.turtle.position())
-            #print(currpos)
             self.turtle.goto(currpos[0] + letter_gap*fontsize, currpos[1])
         #print("DRAEW")
         

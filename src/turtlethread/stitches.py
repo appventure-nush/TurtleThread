@@ -39,7 +39,7 @@ class EmbroideryPattern:
         """Convert to a PyEmbroidery pattern."""
         pattern = pyembroidery.EmbPattern()
         for stitch_group in self.stitch_groups:
-            if (not isinstance(stitch_group, JumpStitch)): 
+            if (not isinstance(stitch_group, JumpStitch)) and stitch_group.color is not None: 
                 pattern += stitch_group.color 
 
             scaled_stitch_commands = (
@@ -103,6 +103,7 @@ class StitchGroup(ABC):
         copied_group._positions = []
         copied_group._start_pos = start_pos
         copied_group._parent_stitch_group = self._parent_stitch_group
+        copied_group.color = self.color
 
         return copied_group
 
