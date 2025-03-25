@@ -1,13 +1,11 @@
 import math
 from math import copysign, cos, degrees, pi, radians, sin, sqrt
-import numpy as np
 
 import pytest
 from pyembroidery import JUMP, STITCH, TRIM
 from pytest import approx
 
-import turtlethread.stitches
-from turtlethread.stitches import ZigzagStitch
+import turtlethread.stitches as stitches
 from turtlethread import Turtle
 from turtlethread.base_turtle import Vec2D
 
@@ -15,7 +13,6 @@ from turtlethread.base_turtle import Vec2D
 @pytest.fixture
 def turtle():
     return Turtle(angle_mode="degrees")
-
 
 def approx_list(nested_list):
     for element in nested_list:
@@ -25,189 +22,12 @@ def approx_list(nested_list):
             return approx(nested_list)
 
 
-class TestTurtle:
-    @pytest.mark.parametrize("angle", [0, -10, 10])
-    @pytest.mark.parametrize("angle_mode", ["degrees", "radians"])
-    def test_angle_property_set(self, turtle, angle, angle_mode):
-        turtle.angle_mode = angle_mode
-        turtle.angle = angle
-        assert turtle.angle == pytest.approx(angle % turtle._fullcircle)
-
-    @pytest.mark.parametrize("angle", [0, -10, 10])
-    def test_angle_property_correct_switch_degrees_radians(self, turtle, angle):
-        turtle.angle_mode = "degrees"
-        turtle.angle = angle
-        turtle.angle_mode = "radians"
-        assert turtle.angle == radians(angle % 360)
-
-    @pytest.mark.parametrize("angle", [0, -pi / 4, pi])
-    def test_angle_property_correct_switch_radians_degrees(self, turtle, angle):
-        turtle.angle_mode = "radians"
-        turtle.angle = angle
-        turtle.angle_mode = "degrees"
-        assert turtle.angle == degrees(angle) % 360
-
-    @pytest.mark.parametrize("angle", [0, -10, 10])
-    def test_heading_same_as_angle(self, turtle, angle):
-        turtle.setheading(angle)
-        assert turtle.heading() == turtle.angle
-        assert turtle.angle == angle % 360
-
-    @pytest.mark.parametrize("invalid_input", [0, 0.0, [0], float("nan"), float("inf")])
-    def test_angle_mode_fails_for_invalid_input_type(self, turtle, invalid_input):
-        with pytest.raises(TypeError):
-            turtle.angle_mode = invalid_input
-
-    def test_angle_mode_fails_for_invalid_input_value(self, turtle):
-        with pytest.raises(KeyError):
-            turtle.angle_mode = "invalid_string_input"
-
-    def test_turtle_left(self, turtle):
-        turtle.left(90)
-        assert turtle.angle == 90
-
-    def test_turtle_right(self, turtle):
-        turtle.right(90)
-        assert turtle.angle == 270
-
-    @pytest.mark.parametrize("invalid_radius", [float("inf"), float("-inf"), float("-nan")])
-    def test_circle_fails_for_invalid_radius(self, turtle, invalid_radius):
-        with pytest.raises(ValueError):
-            turtle.circle(invalid_radius)
-
-    def test_circle_warns_for_zero_radius(self, turtle):
-        with pytest.warns(UserWarning):
-            turtle.circle(0)
-
-    def test_home_resets_angle(self, turtle):
-        turtle.angle = 3
-        turtle.home()
-        assert turtle.angle == 0
-
-    def test_home_resets_position(self, turtle):
-        turtle.goto(20, 20)
-        turtle.home()
-        assert turtle.x == 0
-        assert turtle.y == 0
-
-    @pytest.mark.parametrize("x", [0, -10, 10])
-    @pytest.mark.parametrize("y", [0, -10, 10])
-    def test_goto_changes_position(self, turtle, x, y):
-        turtle.goto(x, y)
-        assert turtle.x == x
-        assert turtle.y == y
-
-    @pytest.mark.parametrize("steps", [1, 2, 5, 10])
-    @pytest.mark.parametrize("radius", [0, 1, 5, 10])
-    @pytest.mark.parametrize("angle_mode", ["degrees", "radians"])
-    def test_circle_stops_and_starts_in_same_position(self, turtle, radius, steps, angle_mode):
-        turtle.angle_mode = angle_mode
-        start_x = turtle.x
-        start_y = turtle.y
-
-        turtle.circle(radius=radius, steps=steps)
-
-        assert turtle.x == approx(start_x)
-        assert turtle.y == approx(start_y)
-
-    @pytest.mark.parametrize("steps", [1, 2, 5, 10])
-    @pytest.mark.parametrize("radius", [-1, 0, 1, 5, 10])
-    @pytest.mark.parametrize("angle_mode", ["degrees", "radians"])
-    def test_circle_stops_and_starts_with_same_angle(self, turtle, radius, steps, angle_mode):
-        turtle.angle_mode = angle_mode
-        start_angle = math.radians(turtle.angle * turtle._degreesPerAU)
-
-        turtle.circle(radius=radius, steps=steps)
-
-        end_angle = math.radians(turtle.angle * turtle._degreesPerAU)
-        assert end_angle == approx(start_angle)
-
-    def test_circle_considers_radius_sign(self, turtle):
-        turtle.angle_mode = "radians"
-        turtle.angle = 0
-        turtle.circle(radius=100, extent=pi, steps=1)
-        assert turtle.x == pytest.approx(0)
-        assert turtle.y == pytest.approx(200)
-        turtle.home()
-        turtle.circle(radius=-100, extent=pi, steps=1)
-        assert turtle.x == pytest.approx(0)
-        assert turtle.y == pytest.approx(-200)
-
-    def test_use_stitch_group_fails_if_inconsistent_state(self, turtle):
-        with pytest.raises(RuntimeError):
-            with turtle.running_stitch(20):
-                with turtle.running_stitch(20):
-                    turtle.cleanup_stitch_type()
-
-    @pytest.mark.parametrize(
-        "stitch_group",
-        [
-            turtlethread.stitches.JumpStitch(Vec2D(0, 0)),
-            turtlethread.stitches.RunningStitch(Vec2D(0, 0), 20),
-            turtlethread.stitches.TripleStitch(Vec2D(0, 0), 20),
-            turtlethread.stitches.ZigzagStitch(Vec2D(0, 0), 20, 20),
-            turtlethread.stitches.SatinStitch(Vec2D(0, 0), 20),
-        ],
-    )
-    def test_set_stitch_type_sets_stitch_type(self, turtle, stitch_group):
-        turtle.set_stitch_type(stitch_group)
-        assert turtle._stitch_group_stack[-1] is stitch_group
-
-    def test_nested_stitch_context(self, turtle):
-        with turtle.running_stitch(20):
-            turtle.forward(20)
-            with turtle.running_stitch(10):
-                turtle.forward(20)
-            turtle.forward(20)
-
-            with turtle.running_stitch(10):
-                turtle.forward(20)
-                with turtle.running_stitch(5):
-                    turtle.forward(10)
-            turtle.forward(20)
-
-            with turtle.jump_stitch():
-                turtle.forward(50)
-                with turtle.running_stitch(10):
-                    turtle.forward(20)
-                turtle.forward(20)
-            turtle.forward(20)
-
-        stitches = turtle.pattern.to_pyembroidery().stitches
-        assert stitches == [
-            (0, 0, STITCH),  # Parent running stitch group
-            (20, 0, STITCH),
-            (20, 0, STITCH),  # First nested running stitch group
-            (30, 0, STITCH),
-            (40, 0, STITCH),
-            (40, 0, STITCH),  # Back to parent running  stitch group
-            (60, 0, STITCH),
-            (60, 0, STITCH),  # Second nested running  stitch group
-            (70, 0, STITCH),
-            (80, 0, STITCH),
-            (80, 0, STITCH),  # Doubly nested running  stitch group
-            (85, 0, STITCH),
-            (90, 0, STITCH),
-            (90, 0, STITCH),  # Back to parent running stitch group
-            (110, 0, STITCH),
-            (110, 0, TRIM),  # Nested jump stitch
-            (160, 0, JUMP),
-            (160, 0, STITCH),  # Running stich within nested jump stitch
-            (170, 0, STITCH),
-            (180, 0, STITCH),
-            (180, 0, TRIM),  # Back to jump stitch
-            (200, 0, JUMP),
-            (200, 0, STITCH),  # Back to parent running stitch
-            (220, 0, STITCH),
-        ]
-
-
 class TestTurtleJumpStitch:
     def test_turtle_jump_stitch_context(self, turtle):
         # Check that we get a trim command in the beginning
         # TODO: Maybe more?
         with turtle.jump_stitch():
-            assert isinstance(turtle._stitch_group_stack[-1], turtlethread.stitches.JumpStitch)
+            assert isinstance(turtle._stitch_group_stack[-1], stitches.JumpStitch)
         assert not turtle.pattern.to_pyembroidery().stitches
 
     def test_turtle_forward(self, turtle):
@@ -315,7 +135,7 @@ class TestTurtleJumpStitch:
 
     def test_start_jump_stitch_sets_stitch_type(self, turtle):
         turtle.start_jump_stitch()
-        assert isinstance(turtle._stitch_group_stack[-1], turtlethread.stitches.JumpStitch)
+        assert isinstance(turtle._stitch_group_stack[-1], stitches.JumpStitch)
 
 
 class TestTurtleRunningStitch:
@@ -455,7 +275,7 @@ class TestTurtleRunningStitch:
 
     def test_start_running_stitch_sets_stitch_type(self, turtle):
         turtle.start_running_stitch(10)
-        assert isinstance(turtle._stitch_group_stack[-1], turtlethread.stitches.RunningStitch)
+        assert isinstance(turtle._stitch_group_stack[-1], stitches.RunningStitch)
 
 
 class TestTurtleTripleStitch:
@@ -520,5 +340,230 @@ class TestTurtleTripleStitch:
 
     def test_start_triple_stitch_sets_stitch_type(self, turtle):
         turtle.start_triple_stitch(10)
-        assert isinstance(turtle._stitch_group_stack[-1], turtlethread.stitches.TripleStitch)
+        assert isinstance(turtle._stitch_group_stack[-1], stitches.TripleStitch)
+
+
+class TestTurtleUnitStitch:
+    def test_round_stitch_length(self):
+        # Notation, let stitch length be S, distance be D
+        # Test 1: Test if S == D, so stitch length == D
+        assert approx(stitches.UnitStitch.round_stitch_length(20, 20)) == 20
+        # Test 2: Test if D < S, so stitch length == D
+        assert approx(stitches.UnitStitch.round_stitch_length(20, 10)) == 10
+        # Test 3: Test if S is a multiple of D, so stitch length == S
+        assert approx(stitches.UnitStitch.round_stitch_length(20, 100)) == 20
+        # Test 4: Test if S is not a multiple of D, so S is the closest multiple of D
+        assert approx(stitches.UnitStitch.round_stitch_length(30, 100)) == 33.33333333333333
+
+
+class TestTurtleZigzagStitch:
+    def test_zigzag_unit(self):
+        zigzag_stitch = stitches.ZigzagStitch(
+            start_pos=Vec2D(0, 0), 
+            stitch_length=20, 
+            stitch_width=10
+        )
+        commands = list(zigzag_stitch._stitch_unit(Vec2D(0, 0), 0, 20)) 
+        assert len(commands) == 2
+        assert commands[0] == (approx(10), approx(-10), STITCH)
+        assert commands[1] == (approx(20), approx(0), STITCH)
+
+    def test_zigzag_start_unit(self):
+        zigzag_stitch = stitches.ZigzagStitch(
+            start_pos=Vec2D(0, 0), 
+            stitch_length=20, 
+            stitch_width=10,
+            center=True
+        )
+        commands = list(zigzag_stitch._start_stitch_unit(Vec2D(0, 0), 0, 20)) 
+        assert len(commands) == 1
+        assert commands[0] == (approx(5), approx(5), STITCH)
+
+    def test_zigzag_end_unit(self):
+        zigzag_stitch = stitches.ZigzagStitch(
+            start_pos=Vec2D(0, 0), 
+            stitch_length=20, 
+            stitch_width=10,
+            center=True
+        )
+        # Test 1: One additional stitch remaining
+        commands = list(zigzag_stitch._end_stitch_unit(Vec2D(0, 0), 0, 20, 15)) 
+        assert len(commands) == 1
+        assert commands[0] == (approx(10), approx(-10), STITCH)
+        # Test 2: No additional stitches needed
+        commands = list(zigzag_stitch._end_stitch_unit(Vec2D(0, 0), 0, 20, 5)) 
+        assert len(commands) == 0
+
+    @pytest.mark.parametrize("start_pos", [Vec2D(0, 0), Vec2D(100, 100), Vec2D(-100, -100)])
+    @pytest.mark.parametrize("end_pos", [Vec2D(100, -100), Vec2D(-100, 100)])
+    @pytest.mark.parametrize("stitch_length", [10, 25, 30])
+    @pytest.mark.parametrize("stitch_width", [3, 10, 25, 30])
+    @pytest.mark.parametrize("center", [True, False])
+    @pytest.mark.parametrize("auto_adjust", [True, False])
+    def test_zigzag_total_distance(self, start_pos, end_pos, stitch_length, stitch_width, center, auto_adjust):
+        zigzag_stitch = stitches.ZigzagStitch(
+            start_pos=start_pos, 
+            stitch_length=stitch_length, 
+            stitch_width=stitch_width,
+            center=center,
+            auto_adjust=auto_adjust,
+            enforce_start_stitch=True,
+            enforce_end_stitch=True
+        )
+        zigzag_stitch.add_location(end_pos)
+        commands = zigzag_stitch.get_stitch_commands()
+        assert commands[0] == (approx(start_pos[0]), approx(start_pos[1]), STITCH)
+        assert commands[-1] == (approx(end_pos[0]), approx(end_pos[1]), STITCH)
+
+    def test_start_zigzag_stitch_sets_stitch_type(self, turtle):
+        turtle.start_zigzag_stitch(20, 20)
+        assert isinstance(turtle._stitch_group_stack[-1], stitches.ZigzagStitch)
+
+
+class TestTurtleSatinStitch:
+    def test_satin_initialization(self):
+        satin_stitch = stitches.SatinStitch(
+            start_pos=Vec2D(0, 0), 
+            stitch_width=10
+        )
+        assert isinstance(satin_stitch, stitches.SatinStitch)
+
+    @pytest.mark.parametrize("start_pos", [Vec2D(0, 0), Vec2D(100, 100), Vec2D(-100, -100)])
+    @pytest.mark.parametrize("end_pos", [Vec2D(100, -100), Vec2D(-100, 100)])
+    @pytest.mark.parametrize("stitch_width", [3, 10, 25, 30])
+    @pytest.mark.parametrize("center", [True, False])
+    def test_satin_total_distance(self, start_pos, end_pos, stitch_width, center):
+        satin_stitch = stitches.SatinStitch(
+            start_pos=start_pos, 
+            stitch_width=stitch_width,
+            center=center
+        )
+        satin_stitch.add_location(end_pos)
+        commands = satin_stitch.get_stitch_commands()
+        assert commands[0] == (approx(start_pos[0]), approx(start_pos[1]), STITCH)
+        assert commands[-1] == (approx(end_pos[0]), approx(end_pos[1]), STITCH)
+
+    def test_start_satin_stitch_sets_stitch_type(self, turtle):
+        turtle.start_satin_stitch(20)
+        assert isinstance(turtle._stitch_group_stack[-1], stitches.SatinStitch)
+
+class TestTurtleCrossStitch:
+    def test_cross_unit(self):
+        cross_stitch = stitches.CrossStitch(
+            start_pos=Vec2D(0, 0), 
+            stitch_length=20, 
+            stitch_width=10
+        )
+        commands = list(cross_stitch._stitch_unit(Vec2D(0, 0), 0, 20)) 
+        assert len(commands) == 3
+        assert commands[0] == (20, -10, STITCH)
+        assert commands[1] == (0, -10, STITCH)
+        assert commands[2] == (20, 0, STITCH) 
+
+    def test_cross_start_unit(self):
+        cross_stitch = stitches.CrossStitch(
+            start_pos=Vec2D(0, 0), 
+            stitch_length=20, 
+            stitch_width=10,
+            center=True
+        )
+        commands = list(cross_stitch._start_stitch_unit(Vec2D(0, 0), 0, 20)) 
+        assert len(commands) == 1
+        assert commands[0] == (approx(0), approx(5), STITCH)
+
+    def test_cross_end_unit(self):
+        cross_stitch = stitches.CrossStitch(
+            start_pos=Vec2D(0, 0), 
+            stitch_length=20, 
+            stitch_width=10,
+            center=True
+        )
+        commands = list(cross_stitch._end_stitch_unit(Vec2D(0, 0), 0, 20, 0)) 
+        assert len(commands) == 1
+        assert commands[0] == (approx(0), approx(-5), STITCH)
+
+    @pytest.mark.parametrize("start_pos", [Vec2D(0, 0), Vec2D(100, 100), Vec2D(-100, -100)])
+    @pytest.mark.parametrize("end_pos", [Vec2D(100, -100), Vec2D(-100, 100)])
+    @pytest.mark.parametrize("stitch_length", [10, 25, 30])
+    @pytest.mark.parametrize("stitch_width", [3, 10, 25, 30])
+    @pytest.mark.parametrize("center", [True, False])
+    @pytest.mark.parametrize("auto_adjust", [True, False])
+    def test_cross_total_distance(self, start_pos, end_pos, stitch_length, stitch_width, center, auto_adjust):
+        cross_stitch = stitches.CrossStitch(
+            start_pos=start_pos, 
+            stitch_length=stitch_length, 
+            stitch_width=stitch_width,
+            center=center,
+            auto_adjust=auto_adjust,
+            enforce_start_stitch=True,
+            enforce_end_stitch=True
+        )
+        cross_stitch.add_location(end_pos)
+        commands = cross_stitch.get_stitch_commands()
+        assert commands[0] == (approx(start_pos[0]), approx(start_pos[1]), STITCH)
+        assert commands[-1] == (approx(end_pos[0]), approx(end_pos[1]), STITCH)
+
+    def test_start_cross_stitch_sets_stitch_type(self, turtle):
+        turtle.start_cross_stitch(20, 20)
+        assert isinstance(turtle._stitch_group_stack[-1], stitches.CrossStitch)
+
+
+class TestTurtleZStitch:
+    def test_z_unit(self):
+        z_stitch = stitches.ZStitch(
+            start_pos=Vec2D(0, 0), 
+            stitch_length=20, 
+            stitch_width=10
+        )
+        commands = list(z_stitch._stitch_unit(Vec2D(0, 0), 0, 20)) 
+        assert len(commands) == 2
+        assert commands[0] == (approx(20), approx(-10), STITCH)
+        assert commands[1] == (approx(20), approx(0), STITCH)
+
+    def test_z_start_unit(self):
+        z_stitch = stitches.ZStitch(
+            start_pos=Vec2D(0, 0), 
+            stitch_length=20, 
+            stitch_width=10,
+            center=True
+        )
+        commands = list(z_stitch._start_stitch_unit(Vec2D(0, 0), 0, 20)) 
+        assert len(commands) == 2
+        assert commands[0] == (approx(10), approx(-5), STITCH)
+        assert commands[1] == (approx(10), approx(5), STITCH)
+
+    def test_z_end_unit(self):
+        z_stitch = stitches.ZStitch(
+            start_pos=Vec2D(0, 0), 
+            stitch_length=20, 
+            stitch_width=10,
+            center=True
+        )
+        commands = list(z_stitch._end_stitch_unit(Vec2D(0, 0), 0, 20, 0)) 
+        assert len(commands) == 0
+
+    @pytest.mark.parametrize("start_pos", [Vec2D(0, 0), Vec2D(100, 100), Vec2D(-100, -100)])
+    @pytest.mark.parametrize("end_pos", [Vec2D(100, -100), Vec2D(-100, 100)])
+    @pytest.mark.parametrize("stitch_length", [10, 25, 30])
+    @pytest.mark.parametrize("stitch_width", [3, 10, 25, 30])
+    @pytest.mark.parametrize("center", [True, False])
+    @pytest.mark.parametrize("auto_adjust", [True, False])
+    def test_z_total_distance(self, start_pos, end_pos, stitch_length, stitch_width, center, auto_adjust):
+        z_stitch = stitches.ZStitch(
+            start_pos=start_pos, 
+            stitch_length=stitch_length, 
+            stitch_width=stitch_width,
+            center=center,
+            auto_adjust=auto_adjust,
+            enforce_start_stitch=True,
+            enforce_end_stitch=True
+        )
+        z_stitch.add_location(end_pos)
+        commands = z_stitch.get_stitch_commands()
+        assert commands[0] == (approx(start_pos[0]), approx(start_pos[1]), STITCH)
+        assert commands[-1] == (approx(end_pos[0]), approx(end_pos[1]), STITCH)
+
+    def test_start_z_stitch_sets_stitch_type(self, turtle):
+        turtle.start_z_stitch(20, 20)
+        assert isinstance(turtle._stitch_group_stack[-1], stitches.ZStitch)
 

@@ -27,15 +27,22 @@ class ScanlineFill(Fill):
 
     Parameters
     ----------
-    angle:
+    angle: str | int | float (default="auto")
         Angle of the lines, in radians. May also be the string 'auto'.
-        If 'auto', the program will automatically try the angles of 0, 45, 90, and 135 degrees, to minimize the number of jump stitches."""
-    def __init__(self, angle : str | int | float = "auto"):
+        If 'auto', the program will automatically try the angles of 0, 45, 90, and 135 degrees, to minimize the number of jump stitches.
+    jump_at_edges: bool (default=False)
+        If True, the fill will do a jump stitch when it encounters an edge during fill, such as to cross from one area to another.
+        This creates a cleaner fill with less stray stitches.
+        Set to False by default as this may slow down embroidery significantly, due to the number of jump stitches involved.
+        """
+    
+    def __init__(self, angle : str | int | float = "auto", jump_at_edges : bool = False):
         if type(angle) == str and angle == "auto":
             self.auto = True
         else:
             self.auto = False
             self.angle = angle
+        self.jump_at_edges = jump_at_edges
             
     def _fill_at_angle(self, turtle, points, angle, simulate=False):
         # Rotate the coordinates
@@ -44,16 +51,17 @@ class ScanlineFill(Fill):
             x_rot, y_rot = rotate_point(x, y, angle)
             rot_points.append((x_rot, y_rot))
 
-        # Basic scanline fill implementation
+        # Find bounding box of polygon
         edges = []
         min_x = rot_points[0][0]
         max_x = rot_points[0][0]
         min_y = rot_points[0][1]
         max_y = rot_points[0][1]
 
-
+        # Find all edges/segments that make up outline
+        # After this, edges should be a list of ((x1, y1), (x2, y2)) tuples
         for i in range(len(rot_points) - 1):
-            # If points is (None, None, ignore that edge!)
+            # If points is (None, None) ignore that edge! This separates different parts of the polygon.
             if rot_points[i][0] is None or rot_points[i + 1][0] is None:
                 continue 
             edges.append((rot_points[i], rot_points[i + 1]))
@@ -62,8 +70,18 @@ class ScanlineFill(Fill):
             min_y = min(min_y, rot_points[i + 1][1])
             max_y = max(max_y, rot_points[i + 1][1])
 
+        # Remove edges where p1 == p2
+        edges_cleaned = []
+        for edge in edges:
+            if not (abs(edge[1][0] - edge[0][0]) < 1 and abs(edge[1][1] - edge[0][1]) < 1): 
+                edges_cleaned.append(edge)
+        edges = edges_cleaned
+
+
+        # Sweep from +y to -y, populating a list of horizontal intersections at each y scanline
         scanned_lines = []
         scanline_y = min_y
+        
         while scanline_y <= max_y:
             intersections = []
             for edge in edges:
@@ -75,8 +93,10 @@ class ScanlineFill(Fill):
                     elif abs(edge[1][0] - edge[0][0]) < 1: # x is equal, hence vertical edge
                         intersections.append((edge[0][0], scanline_y))
                     elif abs(edge[1][1] - edge[0][1]) < 1: # y is equal, hence horizontal edge
-                        intersections.append((edge[0][0], scanline_y))
-                        intersections.append((edge[1][0], scanline_y))
+                        # We don't actually need to care about horiontal edges...?
+                        continue
+                        # intersections.append((edge[0][0], scanline_y))
+                        # intersections.append((edge[1][0], scanline_y))
                     
 
             intersections.sort(key=lambda x: x[0])
@@ -85,17 +105,12 @@ class ScanlineFill(Fill):
                 if abs(intersections[i+1][0] - intersections[i][0]) < 1 and abs(intersections[i+1][1] - intersections[i][1]) < 1:
                     intersections[i] = None
             intersections = [x for x in intersections if x is not None]
-
             scanned_lines.append(intersections)
-            scanline_y += 3
-            if scanline_y >= max_y and scanline_y - max_y < 3:
+            scanline_y += 3 # 3 units (0.3mm) is the minimum density we use
+            if scanline_y > max_y and scanline_y - max_y < 3 - 0.3: # Subtract 0.3 to prevent infinite loop when scanline_y == max_y
                 scanline_y = max_y
 
-        
-        # Un-rotate the coordinates
-        for line in scanned_lines:
-            for i in range(len(line)):
-                line[i] = rotate_point(line[i][0], line[i][1], -angle)
+        # Coordinates are still unrotated!
 
         jump_stitches = 0
         # Jump to start coordinate if needed
@@ -103,26 +118,43 @@ class ScanlineFill(Fill):
         while len(scanned_lines[start_idx]) < 1:
             start_idx += 1
 
-        if abs(Vec2D(scanned_lines[start_idx][0][0], scanned_lines[start_idx][0][1]) - turtle.pos()) > 1:
+        start_pos_rot = rotate_point(scanned_lines[start_idx][0][0], scanned_lines[start_idx][0][1], -angle)
+
+        if abs(Vec2D(start_pos_rot[0], start_pos_rot[1]) - turtle.pos()) > 1:
             with turtle.jump_stitch():
                 jump_stitches += 1
-                if not simulate: turtle.goto(scanned_lines[start_idx][0])
+                if not simulate: turtle.goto(start_pos_rot)
 
+        # Continuously loop through scanned lines until there is nothing left to fill
         no_fill_in_current_iteration_flag = False
         while not no_fill_in_current_iteration_flag:
             no_fill_in_current_iteration_flag = True
+            prev_line = None
             jump = False
-            for i in range(start_idx, len(scanned_lines) - 1):
+            for i in range(start_idx, len(scanned_lines) - 1): # For each scanned line
                 with turtle.direct_stitch():
-                    if len(scanned_lines[i]) >= 2:
-                        no_fill_in_current_iteration_flag = False
-                        if jump: 
+                    if len(scanned_lines[i]) >= 2: # If there are at least 2 coordinates, there needs to be a stitch between them!
+                        no_fill_in_current_iteration_flag = False # Something was filled this iteration! For while loop to continue
+                        stitch_rot = (
+                            rotate_point(scanned_lines[i][0][0], scanned_lines[i][0][1], -angle), 
+                            rotate_point(scanned_lines[i][1][0], scanned_lines[i][1][1], -angle)
+                        )
+
+                        if self.jump_at_edges:
+                            # Check if the line will cross an edge, by seeing if previous stitch's left is 'lefter' than next stitch's right
+                            # Check similarly for right hand side
+                            if prev_line is not None and len(prev_line) >= 2:
+                                if prev_line[1][0] < scanned_lines[i][0][0] or prev_line[0][0] > scanned_lines[i][1][0]:
+                                    jump = True
+                            prev_line = (scanned_lines[i][0], scanned_lines[i][1])
+
+                        if jump: # If there are gaps in the scanned lines, jump to the position of the first stitch
                             with turtle.jump_stitch():
-                                if not simulate: turtle.goto(scanned_lines[i][0])
+                                if not simulate: turtle.goto(stitch_rot[0])
                                 jump_stitches += 1
                                 jump = False
-                        if not simulate: turtle.goto(scanned_lines[i][0])
-                        if not simulate: turtle.goto(scanned_lines[i][1])
+                        if not simulate: turtle.goto(stitch_rot[0])
+                        if not simulate: turtle.goto(stitch_rot[1])
                         scanned_lines[i].pop(0)
                         scanned_lines[i].pop(0)
                     else:

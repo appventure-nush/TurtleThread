@@ -1,4 +1,4 @@
-from pyembroidery import JUMP, STITCH, TRIM
+from pyembroidery import JUMP, STITCH, TRIM, COLOR_CHANGE
 import tkinter as tk
 from tkinter.constants import LEFT, RIGHT
 import os
@@ -74,8 +74,8 @@ def _finish_visualise(done, bye):
             pass
 
 
-def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, speed=6, trace_jump=False, done=True,
-                      bye=True):
+def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, speed=6, trace_jump=False, skip=False, 
+                      done=True, bye=True):
     """Use the builtin ``turtle`` library to visualise an embroidery pattern.
 
     Parameters
@@ -121,6 +121,9 @@ def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, spee
         turtle = Turtle._pen
 
     turtle.speed(speed)
+
+    if skip:
+        turtle._tracer(0)
 
     screen = Screen()
     screen.setup(width, height)
@@ -208,6 +211,8 @@ def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, spee
     turtle.pendown()
 
     raise_error = False
+    threads = list(pattern.threadlist)
+    thread_idx = 0
     for x, y, command in pattern.stitches:
         x = scale * x
         y = scale * y
@@ -229,14 +234,17 @@ def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, spee
             centered_cross(turtle, 10 * scale)
         elif command == STITCH:
             turtle.setheading(turtle.towards(x, -y))
-            turtle.color("blue")
+            if len(threads) > 0:
+                turtle.color(threads[thread_idx].hex_color())
+            else:
+                turtle.color("blue")
 
             #  20%  60%   20%
             # blank line blank
             # if stitch is long, limit blank part
             xcur, ycur = turtle.position()
             d = ((xcur - x) ** 2 + (ycur - (-y)) ** 2) ** 0.5  # maybe find a way to avoid fp errors here? prob unnecessary
-            blank = min(d/5, 5)
+            blank = min(d/5, 2)
             solid = d - 2*blank
 
             w = turtle.width()
@@ -249,10 +257,16 @@ def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, spee
             turtle.forward(blank)
             turtle.pendown()
             turtle.width(w)
+        elif command == COLOR_CHANGE:
+            thread_idx += 1
 
         else:
             raise_error = True
             break
+
+    if skip:
+        turtle._update()
+        turtle._tracer(1)
 
     _finish_visualise(done=done, bye=bye)
 

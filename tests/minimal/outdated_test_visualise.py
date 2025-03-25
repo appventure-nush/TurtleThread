@@ -6,7 +6,7 @@ from pytest import fixture
 
 import turtlethread.visualise
 
-from .create_postscript import draw_empty_scene, draw_square_flower, draw_stamp, draw_test_scene
+from create_postscript import draw_empty_scene, draw_square_flower, draw_stamp, draw_test_scene
 
 
 @fixture

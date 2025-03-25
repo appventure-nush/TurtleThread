@@ -126,7 +126,7 @@ class LetterDrawer():
         return list(self.loaded_fonts.keys()) 
 
 
-    def draw_one_letter(self, fontname, lettername, fontsize=20, colour='#000000', thickness=1, fill=True, outline=False, fill_min_y_dist:int=10, fill_min_x_dist=10, full_fill=True, turtle=None, flip_y=False): 
+    def draw_one_letter(self, fontname, lettername, fontsize=20, colour='#000000', thickness=1, fill=False, outline=True, fill_min_y_dist:int=10, fill_min_x_dist=10, full_fill=True, turtle=None, flip_y=False): 
         """This function draws a single letter.
 
         Parameters
@@ -137,12 +137,12 @@ class LetterDrawer():
             Specify the name of a letter. Spaces should be called 'space' and not ' '.
         fontsize : int (optional, default=20)
             Specify the font size used to draw the text.
-        fill : bool (optional, default=True)
+        fill : bool (optional, default=False)
             Specify whether or not the text should be filled.
         full_fill : bool (optional, default=True)
             Specify whether the text should be filled with ``full_fill`` or ``partial_fill`` (only used if ``fill=True``). 
             Note that ``full_fill`` can have bugs at small font sizes (120 is considered small), while ``partial_fill`` might cross over the boundaries of the text. 
-        outline : bool (optional, default=False)
+        outline : bool (optional, default=True)
             Specify whether the text should be outlined (it is recommended to outline when not filling or using ```partial_fill```, but not ```full_fill```). 
         flip_y : bool (optional, default=False)
             Allow you to vertically flip the text if desired. Defaults to ``False``.
@@ -192,11 +192,10 @@ class LetterDrawer():
         # this draws the gap between two letters (not whitespace) 
         with self.turtle.jump_stitch(): 
             currpos = list(self.turtle.position())
-            #print(currpos)
             self.turtle.goto(currpos[0] + letter_gap*fontsize, currpos[1])
         #print("DRAEW")
         
-    def draw_string(self, fontname, string, fontsize, colours='#000000', thicknesses = 1, fills=True, outlines=False, fill_min_y_dist=10, fill_min_x_dist=10, full_fill=True, letter_gaps=None, turtle=None, flip_y=False): 
+    def draw_string(self, fontname, string, fontsize, colours='#000000', thicknesses = 1, fills=False, outlines=True, fill_min_y_dist=10, fill_min_x_dist=10, full_fill=True, letter_gaps=None, turtle=None, flip_y=False): 
         """This function draws a string of letters.
         
         Parameters
@@ -207,12 +206,12 @@ class LetterDrawer():
             Specify the name of a letter. Spaces should be called 'space' and not ' '.
         fontsize : int (optional, default=20)
             Specify the font size used to draw the text.
-        fills : bool/list[bool] (optional, default=True)
+        fills : bool/list[bool] (optional, default=False)
             Specify whether or not the text should be filled. Also accepts a list with one element per letter in the string.
         full_fill : bool (optional, default=True)
             Specify whether the text should be filled with ``full_fill`` or ``partial_fill`` (only used if ``fill=True``). 
             Note that ``full_fill`` can have bugs at small font sizes (120 is considered small), while ``partial_fill`` might cross over the boundaries of the text. 
-        outlines : bool/list[bool] (optional, default=False)
+        outlines : bool/list[bool] (optional, default=True)
             Specify whether the text should be outlined (it is recommended to outline when not filling or using ```partial_fill```, but not ```full_fill```). 
             Also accepts a list with one element per letter in the string.
         flip_y : bool (optional, default=False)
