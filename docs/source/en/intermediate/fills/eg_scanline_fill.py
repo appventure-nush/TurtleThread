@@ -8,13 +8,11 @@ t = turtlethread.Turtle()
 # minimizes the number of jump stitches.
 t.begin_fill(fills.ScanlineFill("auto")) 
 
-# Draw a triangle
 with t.running_stitch(25):
     for i in range(3):
         t.forward(100)
         t.right(120)
 
-# You must call the end_fill() function, or the shape will not be filled!
 t.end_fill()
 
 # You can also choose an angle (in radians) and pass it to ScanlineFill.
