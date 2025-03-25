@@ -283,7 +283,6 @@ class UnitStitch(StitchGroup):
             distance_traveled += stitch_length
 
         # Do not do end stitches if the unit stitch reaches the final destination
-        print(distance_traveled, distance)
         if (distance_traveled < distance or (math.isclose(distance_traveled, distance, rel_tol=0.001))) and self.enforce_end_stitch:
             self.x = x
             self.y = y
