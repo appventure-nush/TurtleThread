@@ -339,7 +339,7 @@ def move_turtle_to(te:turtlethread.Turtle, x, y):
     prev_stitch = new_stitch 
     prev_end_pos = x, y 
 
-    
+outline_stitch_grp = None 
 
 
 def Bezier(p1, p2, t):  # 一阶贝塞尔函数
@@ -400,14 +400,14 @@ def line(te, startx, starty, x1, y1, x2, y2):  # 连接svg坐标下两点
     with te.jump_stitch(): 
         move_turtle_to(te, startx + x1, starty - y1)
     #te.pendown()
-    with te.running_stitch(30): 
+    with te.use_stitch_group(outline_stitch_grp): 
         move_turtle_to(te, startx + x2, starty - y2) 
     #te.penup()
 
 
 def Lineto_r(te, dx, dy):  # 连接当前点和相对坐标（dx，dy）的点
     #te.pendown()
-    with te.running_stitch(30): 
+    with te.use_stitch_group(outline_stitch_grp): 
         if flip_y: 
             move_turtle_to(te, texcor() + dx, -teycor() - dy) 
         else: 
@@ -417,7 +417,7 @@ def Lineto_r(te, dx, dy):  # 连接当前点和相对坐标（dx，dy）的点
 
 def Lineto(te, startx, starty, x, y):  # 连接当前点和svg坐标下（x，y）
     #te.pendown()
-    with te.running_stitch(30): 
+    with te.use_stitch_group(outline_stitch_grp): 
         move_turtle_to(te, startx + x, starty - y) 
     #te.penup()
 
@@ -491,8 +491,7 @@ def readPathAttrD(w_attr):
         was_e = False 
 
 
-
-def drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1, fill=True, outline=False, fill_min_y_dist:int=10, fill_min_x_dist=10, full_fill=True, flip_y_in:bool=False): # TODO consider colour 
+def drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1, fill=True, outline=False, fill_min_y_dist:int=10, fill_min_x_dist=10, full_fill=True, flip_y_in:bool=False, satin_outline=True): 
     # draws an SVG file with the turtle 
     #print("HI DRAWING SVG")
 
@@ -722,9 +721,15 @@ def drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1,
     # TODO: use satin stitch for thickness 
     starty += round(Height) # just to fix the calculations below, since the origin is somewhere else 
     if outline: 
+        global outline_stitch_grp
+        if satin_outline: 
+            outline_stitch_grp = turtlethread.stitches.SatinStitch(te.pos(), te.curr_color, 15, center=True)
+        else: 
+            outline_stitch_grp = turtlethread.stitches.DirectStitch(te.pos(), te.curr_color)
+
         debug = []
-        te.begin_fill(closed=False)
-        with te.direct_stitch(): # 99999 will make sure we won't have gaps 
+        #te.begin_fill(closed=False)
+        with te.use_stitch_group(outline_stitch_grp): # 99999 will make sure we won't have gaps 
             #te.color(w_color) # TODO SWITCH COLOUR OF TEXT 
 
             def get_position(): 
@@ -900,6 +905,7 @@ def _fake_drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickn
     # outline 
     starty += round(Height) # just to fix the calculations below, since the origin is somewhere else 
     if outline: 
+        outline_stitch_grp = turtlethread.stitches.DirectStitch(te.pos(), te.curr_color)
         debug = [] 
         with te.running_stitch(30): # 99999 will make sure we won't have gaps 
 

@@ -126,7 +126,7 @@ class LetterDrawer():
         return list(self.loaded_fonts.keys()) 
 
 
-    def draw_one_letter(self, fontname, lettername, fontsize=20, colour='#000000', thickness=1, fill=False, outline=True, fill_min_y_dist:int=10, fill_min_x_dist=10, full_fill=True, turtle=None, flip_y=False): 
+    def draw_one_letter(self, fontname, lettername, fontsize=20, colour='#000000', thickness=1, fill=False, outline=True, fill_min_y_dist:int=10, fill_min_x_dist=10, full_fill=True, turtle=None, flip_y=False, satin_outline=True): 
         """This function draws a single letter.
 
         Parameters
@@ -154,6 +154,8 @@ class LetterDrawer():
             Advanced parameter deciding the resolution of ``partial_fill``.
             If ``partial_fill`` is taking too long, consider increasing this value to make it run faster, at the cost of a lower resolution of fill.
             Default value is 10, and this should never be set below 5.
+        satin_outline : bool (optional, default=True) 
+            Advanced parameter deciding if the outline is to be done with satin stitches or not. If set to False, will use direct stitches instead 
         """
         # draws one letter with the turtles, with the specified fields. 
         # turtle defaults to self.turtle 
@@ -174,7 +176,7 @@ class LetterDrawer():
         # DRAW ONE LETTER OF A FONT WITH A LOADED NAME, GIVEN A COLOUR 
         if fontname in self.loaded_fonts.keys(): 
             try: 
-                drawSVG(turtle, self.loaded_fonts[fontname][lettername], fontsize, colour, thickness, fill, outline, fill_min_y_dist, fill_min_x_dist, full_fill, flip_y) 
+                drawSVG(turtle, self.loaded_fonts[fontname][lettername], fontsize, colour, thickness, fill, outline, fill_min_y_dist, fill_min_x_dist, full_fill, flip_y, satin_outline=satin_outline) 
                 #print("DREW SVG")
             except Exception as e: 
                 print("OR, it might be some other error({})".format(e))
@@ -195,7 +197,7 @@ class LetterDrawer():
             self.turtle.goto(currpos[0] + letter_gap*fontsize, currpos[1])
         #print("DRAEW")
         
-    def draw_string(self, fontname, string, fontsize, colours='#000000', thicknesses = 1, fills=False, outlines=True, fill_min_y_dist=10, fill_min_x_dist=10, full_fill=True, letter_gaps=None, turtle=None, flip_y=False): 
+    def draw_string(self, fontname, string, fontsize, colours='#000000', thicknesses = 1, fills=False, outlines=True, fill_min_y_dist=10, fill_min_x_dist=10, full_fill=True, letter_gaps=None, turtle=None, flip_y=False, satin_outline=True): 
         """This function draws a string of letters.
         
         Parameters
@@ -224,6 +226,8 @@ class LetterDrawer():
             Advanced parameter deciding the resolution of ``partial_fill``.
             If ``partial_fill`` is taking too long, consider increasing this value to make it run faster, at the cost of a lower resolution of fill.
             Default value is 10, and this should never be set below 5.
+        satin_outline : bool (optional, default=True) 
+            Advanced parameter deciding if the outline is to be done with satin stitches or not. If set to False, will use direct stitches instead 
         """
         # this draws a multiline string, automatically drawing letter gaps as desired 
         # if fills is True, will fill the text with satin stitch. else, will draw the text outline 
@@ -283,7 +287,7 @@ class LetterDrawer():
                 outline = outlines[cidx] 
                 
             #print("DRAWING LETTER", string[cidx], "FILL", fill)
-            self.draw_one_letter(fontname, LetterDrawer.char_to_name(string[cidx]), fontsize, col, thickness, fill, outline, fill_min_y_dist, fill_min_x_dist, full_fill, turtle, flip_y) 
+            self.draw_one_letter(fontname, LetterDrawer.char_to_name(string[cidx]), fontsize, col, thickness, fill, outline, fill_min_y_dist, fill_min_x_dist, full_fill, turtle, flip_y, satin_outline) 
 
             if isinstance(letter_gaps, list): 
                 letter_gap = letter_gaps[cidx] 
@@ -320,7 +324,7 @@ class LetterDrawer():
                 outline = outlines[cidx] 
                 
             #print("DRAWING LETTER", string[-1], "FILL", fill)
-            self.draw_one_letter(fontname, LetterDrawer.char_to_name(string[cidx]), fontsize, col, thickness, fill, outline, fill_min_y_dist, fill_min_x_dist, full_fill, turtle, flip_y) 
+            self.draw_one_letter(fontname, LetterDrawer.char_to_name(string[cidx]), fontsize, col, thickness, fill, outline, fill_min_y_dist, fill_min_x_dist, full_fill, turtle, flip_y, satin_outline) 
 
             if isinstance(letter_gaps, list) and len(letter_gaps) > cidx: # if we have another letter gap, include it. 
                 letter_gap = letter_gaps[cidx] 
