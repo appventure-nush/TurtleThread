@@ -463,12 +463,22 @@ def transform(w_attr):
 
 def readPathAttrD(w_attr):
     curr_parse = ''
+    was_e = False 
     for i in w_attr:
         # print("now cmd:", i)
-        if i == ' ':
+        if i == ' ' or i == ',':
             #print(float(curr_parse)) 
             yield float(curr_parse)
             curr_parse = ""
+        elif i=='-' and not was_e: 
+            if curr_parse: 
+                #print(float(curr_parse))
+                yield float(curr_parse) 
+            curr_parse = '-'
+        elif i=='e': 
+            curr_parse += i 
+            was_e = True 
+            continue 
         elif i.isalpha():
             if (curr_parse):
                 #print(float(curr_parse))
@@ -478,6 +488,7 @@ def readPathAttrD(w_attr):
             yield i
         else:
             curr_parse += i
+        was_e = False 
 
 
 
@@ -749,7 +760,7 @@ def drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1,
                         set_firstpos() 
                     elif i == 'm':
                         #te.end_fill()
-                        Moveto_r(te, startx, starty, next(f) * scale[0], next(f) * scale[1])
+                        Moveto_r(te, next(f) * scale[0], next(f) * scale[1])
                         set_firstpos() 
                         #te.begin_fill()
                     elif i == 'C':
@@ -759,6 +770,16 @@ def drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1,
                         lastI = i
                     elif i == 'c':
                         Curveto_r(te, startx, starty, next(f) * scale[0], next(f) * scale[1],
+                                next(f) * scale[0], next(f) * scale[1],
+                                next(f) * scale[0], next(f) * scale[1])
+                        lastI = i
+                    elif i == 'S': 
+                        Curveto(te, startx, starty, *list(teposition()),
+                                next(f) * scale[0], next(f) * scale[1],
+                                next(f) * scale[0], next(f) * scale[1])
+                        lastI = i
+                    elif i=='s': 
+                        Curveto_r(te, startx, starty, *list(teposition()),
                                 next(f) * scale[0], next(f) * scale[1],
                                 next(f) * scale[0], next(f) * scale[1])
                         lastI = i
@@ -923,6 +944,16 @@ def _fake_drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickn
                     lastI = i
                 elif i == 'c':
                     Curveto_r(te, startx, starty, next(f) * scale[0], next(f) * scale[1],
+                            next(f) * scale[0], next(f) * scale[1],
+                            next(f) * scale[0], next(f) * scale[1])
+                    lastI = i
+                elif i == 'S': 
+                    Curveto(te, startx, starty, *list(teposition()),
+                            next(f) * scale[0], next(f) * scale[1],
+                            next(f) * scale[0], next(f) * scale[1])
+                    lastI = i
+                elif i=='s': 
+                    Curveto_r(te, startx, starty, *list(teposition()),
                             next(f) * scale[0], next(f) * scale[1],
                             next(f) * scale[0], next(f) * scale[1])
                     lastI = i
