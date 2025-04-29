@@ -529,6 +529,33 @@ def reflect_point(cx, cy, px, py):
 
 
 def drawSVG(te:turtlethread.Turtle, filename, height, width=None, w_color=None, thickness=1, fill=True, outline=False, fill_min_y_dist:int=10, fill_min_x_dist=10, full_fill=True, flip_y_in:bool=False): # TODO consider colour 
+    """Function to draw an SVG file with a turtle. 
+    
+    Parameters 
+    ----------
+    te : turtlethread.Turtle 
+        The turtle object to draw with.
+    filename : str 
+        The name of the SVG file to be drawn.
+    height : int
+        The height of the SVG to be drawn.
+    width : int, optional
+        The width of the SVG to be drawn. If None, it will be set to the same value as height.
+    fill : bool, optional
+        If True, the SVG will be filled. Default is True.
+    outline : bool, optional
+        If True, the SVG will be outlined. Default is False.
+    full_fill : bool, optional
+        If True, the SVG will be fully filled if set to fill, otherwise it will be partialy filled. Default is True.
+    fill_min_y_dist : int, optional
+        The minimum distance between fill points in the y direction. Default is 10 (1mm).
+    fill_min_x_dist : int, optional
+        The minimum distance between fill points in the x direction. Default is 10 (1mm).
+
+    There are other possible keyword arguments, but they are actually ignored. 
+    
+    """
+    
     global prev_ctrl
     if width is None: 
         width = height 
@@ -1029,11 +1056,12 @@ def _fake_drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickn
                     currpos = teposition() 
                     Curveto_r(te, startx, starty, *vs[0], *vs[1], *vs[2])
                     lastI = i
-                    prev_ctrl = [vs[1][0]+currpos[0], vs[1][1]+currpos[1]] 
+                    prev_ctrl = [vs[1][0]+currpos[0]-startx, starty-(vs[1][1]+currpos[1])] 
                     #print(vs)
                 elif i == 'S': 
                     if lastI.lower() == 'c': 
-                        ctrl_point = reflect_point(*list(teposition()), prev_ctrl[0], prev_ctrl[1])
+                        ctrl_point = reflect_point(*list(teposition()), prev_ctrl[0]+startx, starty-prev_ctrl[1])
+                        ctrl_point = [ctrl_point[0]-startx, starty-ctrl_point[1]] 
                         #print("REF")
                     else: 
                         ctrl_point = list(teposition())
@@ -1045,8 +1073,10 @@ def _fake_drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickn
                     if lastI.lower() == 'c': 
                         currpos = list(teposition()) 
                         #print(*currpos, prev_ctrl)
-                        ctrl_point = reflect_point(*list(teposition()), prev_ctrl[0], prev_ctrl[1])
-                        ctrl_point = [ctrl_point[0]-currpos[0], ctrl_point[1]-currpos[1]]
+                        #print("START", startx, starty)
+                        ctrl_point = reflect_point(*currpos, prev_ctrl[0]+startx, starty-prev_ctrl[1])
+                        #print(prev_ctrl, ctrl_point, (startx, starty), currpos)
+                        ctrl_point = [ctrl_point[0]-currpos[0], currpos[1]-ctrl_point[1]]
                         #print("REF")
                     else: 
                         ctrl_point = list(teposition())
@@ -1055,21 +1085,41 @@ def _fake_drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickn
                             next(f) * scale[0], next(f) * scale[1])
                     lastI = i
                 elif i == 'Q': 
-                    X_now = texcor() #- startx
-                    if flip_y: 
-                        Y_now = -teycor() #starty - teycor()
-                    else: 
-                        Y_now = teycor() 
-                    Bezier_2(te, X_now, Y_now, next(f) * scale[0] + startx, -next(f) * scale[1] + starty, 
-                            next(f) * scale[0] + startx, -next(f) * scale[1] + starty) 
+                    vs = [(next(f) * scale[0], next(f) * scale[1]) for _ in range(2)] 
+                    #print("TEPOS", *teposition())
+                    Quadto(te, startx, starty, *vs[0], *vs[1]) 
+                    prev_ctrl = vs[0] 
+                    lastI = i 
                 elif i == 'q': 
-                    X_now = texcor() 
-                    if flip_y: 
-                        Y_now = -teycor() #starty - teycor()
+                    currpos = list(teposition()) 
+                    X_now, Y_now = currpos 
+                    vs = [(next(f) * scale[0], next(f) * scale[1]) for _ in range(2)] 
+                    Quadto_r(te, startx, starty, *vs[0], *vs[1]) 
+                    prev_ctrl = [vs[0][0]+currpos[0], vs[0][1]+currpos[1]] 
+                    lastI = i 
+                elif i == 'T': 
+                    if lastI.lower() == 'q': 
+                        #print("PREV CTRL", prev_ctrl)
+                        ctrl_point = reflect_point(*list(teposition()), prev_ctrl[0]+startx, starty-prev_ctrl[1])
+                        ctrl_point = [ctrl_point[0]-startx, starty-ctrl_point[1]]
+                        #print("REF")
                     else: 
-                        Y_now = teycor() 
-                    Bezier_2(te, X_now, Y_now, X_now + next(f) * scale[0], Y_now - next(f) * scale[1], 
-                            X_now + next(f) * scale[0], Y_now - next(f) * scale[1],) 
+                        ctrl_point = list(teposition())
+                    Quadto(te, startx, starty, *ctrl_point,
+                            next(f) * scale[0], next(f) * scale[1],)
+                    lastI = i
+                elif i == 't': 
+                    currpos = list(teposition())
+                    if lastI.lower() == 'q': 
+                        #print("PREV CTRL", prev_ctrl)
+                        ctrl_point = reflect_point(*currpos, prev_ctrl[0]+startx, starty-prev_ctrl[1])
+                        ctrl_point = [ctrl_point[0]-currpos[0], currpos[1]-ctrl_point[1]]
+                        #print("REF")
+                    else: 
+                        ctrl_point = list(teposition())
+                    Quadto_r(te, startx, starty, *ctrl_point,
+                            next(f) * scale[0], next(f) * scale[1],)
+                    lastI = i
                 elif i == 'L':
                     Lineto(te, startx, starty, next(f) * scale[0], next(f) * scale[1])
                 elif i == 'l':
