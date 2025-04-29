@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="400" height="250" viewBox="0 0 400 250" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="white" />
+
+  <!-- Q + T path -->
+  <path d="M50 200 
+           Q 150 100, 250 200 
+           T 350 200z"
+        stroke="blue"
+        fill="transparent"
+        stroke-width="3"/>
+
+  <!-- Start point -->
+  <circle cx="50" cy="200" r="4" fill="green"/>
+  <text x="55" y="195" font-size="12" fill="green">Start</text>
+
+  <!-- Q control point -->
+  <circle cx="150" cy="100" r="4" fill="red"/>
+  <text x="155" y="95" font-size="12" fill="red">Q Control</text>
+
+  <!-- First end point (from Q) -->
+  <circle cx="250" cy="200" r="4" fill="orange"/>
+  <text x="255" y="195" font-size="12" fill="orange">Q End</text>
+
+  <!-- Second end point (from T) -->
+  <circle cx="350" cy="200" r="4" fill="purple"/>
+  <text x="355" y="195" font-size="12" fill="purple">T End</text>
+
+  <!-- Dashed lines to control point for reference -->
+  <line x1="50" y1="200" x2="150" y2="100" stroke="gray" stroke-dasharray="4"/>
+  <line x1="150" y1="100" x2="250" y2="200" stroke="gray" stroke-dasharray="4"/>
+</svg>

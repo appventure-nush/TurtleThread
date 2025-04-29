@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="500" height="300" viewBox="0 0 500 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="white" />
+
+  <!-- C + S path -->
+  <path d="M50 250 
+           C 150 50, 250 50, 350 250 
+           S 450 250, 470 150z"
+        stroke="blue"
+        fill="none"
+        stroke-width="3"/>
+
+  <!-- Markers for control and end points -->
+  <!-- C control points -->
+  <circle cx="150" cy="50" r="4" fill="red"/>
+  <circle cx="250" cy="50" r="4" fill="red"/>
+  <text x="155" y="45" font-size="12" fill="red">C1</text>
+  <text x="255" y="45" font-size="12" fill="red">C2</text>
+
+  <!-- S control point (only one given; first is inferred) -->
+  <circle cx="450" cy="250" r="4" fill="orange"/>
+  <text x="455" y="245" font-size="12" fill="orange">S2</text>
+
+  <!-- End points -->
+  <circle cx="50" cy="250" r="4" fill="green"/>
+  <text x="55" y="245" font-size="12" fill="green">Start</text>
+
+  <circle cx="350" cy="250" r="4" fill="purple"/>
+  <text x="355" y="245" font-size="12" fill="purple">C End</text>
+
+  <circle cx="470" cy="150" r="4" fill="purple"/>
+  <text x="475" y="145" font-size="12" fill="purple">S End</text>
+
+  <!-- Dashed lines for visualizing control links -->
+  <line x1="50" y1="250" x2="150" y2="50" stroke="gray" stroke-dasharray="4"/>
+  <line x1="150" y1="50" x2="250" y2="50" stroke="gray" stroke-dasharray="4"/>
+  <line x1="250" y1="50" x2="350" y2="250" stroke="gray" stroke-dasharray="4"/>
+
+  <line x1="350" y1="250" x2="450" y2="250" stroke="gray" stroke-dasharray="4"/>
+  <line x1="450" y1="250" x2="470" y2="150" stroke="gray" stroke-dasharray="4"/>
+</svg>
