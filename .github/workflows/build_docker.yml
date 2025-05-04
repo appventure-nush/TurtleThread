@@ -3,7 +3,7 @@ name: Build and push to registry
 on:
   push:
     branches:
-      - min_docs
+      - main
 
 jobs:
   build:
