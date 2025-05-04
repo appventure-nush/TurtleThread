@@ -3,20 +3,8 @@ pip
 wheel
 twine
 
-flake8
-black
-isort
-seed-isort-config
-bumpversion
-
 sphinx
-numpydoc
-sphinx_book_theme
-sphinx-gallery
-sphinx-intl
-sphinx-toolbox
-matplotlib
-watchdog
+furo
 
 tox
 coverage
