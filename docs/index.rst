@@ -1,5 +1,5 @@
-TurtleThread
-============
+Welcome to TurtleThread!
+========================
 
 .. TODO: GET NICE COVER IMAGE
 .. .. image:: ../../_static/figures/collage.png
@@ -13,6 +13,13 @@ interface.
 If you are moving to TurtleThread from Python Turtle, take a look at the
 `intermediate tutorial <intermediate/whatsnew.html>`_. For beginners, it may be helpful to visit the `beginners 
 introduction <https://turtlethread.com/en/intro/index.html>`_ by the original developers of TurtleThread.
+
+.. admonition:: Which version of TurtleThread is this?
+   :class: important
+   
+   This is a **fork** of the original TurtleThread by AppVenture, NUS High's Computer Science Interest Group. The
+   original was developed by Marie Roald and Yngve Mardal Moe. You can visit that version 
+   `here <https://turtlethread.com/en/>`_.  
 
 .. toctree::
    :maxdepth: 2

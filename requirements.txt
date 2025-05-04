@@ -5,6 +5,7 @@ twine
 
 sphinx
 furo
+sphinx-copybutton
 
 tox
 coverage

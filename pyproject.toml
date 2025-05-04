@@ -50,13 +50,9 @@ Homepage = "https://github.com/appventure-nush/turtlethread"
 
 [project.optional-dependencies]
 docs = [
-    "Jinja2>=3.0",
-    "numpydoc",
-    "pydata-sphinx-theme==0.15.2",
-    "sphinx==7.2.6",
+    "sphinx",
     "furo",
-    "sphinx-gallery",
-    "sphinx-toolbox",
+    "sphinx-copybutton",
 ]
 dev = [
     "pytest",
