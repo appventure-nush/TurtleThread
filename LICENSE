@@ -1,8 +1,9 @@
 GNU GENERAL PUBLIC LICENSE
                       Version 3, 29 June 2007
 
-    A Turtle-interface for making embroidery files
-    Copyright (C) 2021  Marie Roald & Yngve Mardal Moe
+    A Turtle-interface for making embroidery files.
+    This is a fork of the original version by Marie Roald & Yngve Mardal Moe.
+    Copyright (c) 2025, AppVenture (NUS High Computer Science Interest Group)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

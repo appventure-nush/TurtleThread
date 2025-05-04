@@ -1,16 +1,30 @@
-FROM python:3.12.1-bookworm
+FROM python:3.12-alpine AS build
 
-ENV TURTLETHREAD_VENV=/turtlethread-venv
-ENV DISPLAY=:12
-RUN apt-get update -y \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y\
-        xvfb \
-        ghostscript \
-        inkscape \
-        git \
-        vim \
-    && python -m venv $TURTLETHREAD_VENV \
-    && echo "if ! pidof Xvfb; then Xvfb $DISPLAY -screen 0 1920x1080x24 2>/tmp/Xvfb.log & fi" >> /root/.bashrc \
-    && echo "test -z $VIRTUAL_ENV && source $TURTLETHREAD_VENV/bin/activate" >> /root/.bashrc
+WORKDIR /app 
 
-CMD Xvfb $DISPLAY -screen 0 1920x1080x24 2>/tmp/Xvfb.log & sleep 1 && bash
+RUN apk add make
+
+COPY src/ ./src
+COPY requirements.txt .
+COPY pyproject.toml .
+COPY README.md .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY docs/ ./docs
+COPY logo/ ./logo
+WORKDIR /app/docs
+RUN make clean
+RUN make html
+
+FROM busybox:musl AS deploy
+
+EXPOSE 80
+
+RUN adduser -D static
+USER static
+WORKDIR /home/static
+
+COPY --from=build /app/docs/_build/html /data/www/
+
+CMD ["busybox", "httpd", "-f", "-v", "-p", "80", "-h", "/data/www"]

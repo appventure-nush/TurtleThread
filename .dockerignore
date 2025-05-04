@@ -13,8 +13,6 @@ manual_code_output
 *.DS_Store
 raw_assets
 !docs/_static/figures/auto_examples
-docs_old
-.ruff_cache/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
