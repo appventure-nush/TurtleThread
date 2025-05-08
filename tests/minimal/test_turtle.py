@@ -141,12 +141,12 @@ class TestTurtle:
         "stitch_group",
         [
             stitches.JumpStitch(Vec2D(0, 0)),
-            stitches.RunningStitch(Vec2D(0, 0), 20),
-            stitches.TripleStitch(Vec2D(0, 0), 20),
-            stitches.ZigzagStitch(Vec2D(0, 0), 20, 20),
-            stitches.SatinStitch(Vec2D(0, 0), 20),
-            stitches.CrossStitch(Vec2D(0, 0), 20, 20),
-            stitches.ZStitch(Vec2D(0, 0), 20, 20),
+            stitches.RunningStitch(Vec2D(0, 0), None, 20),
+            stitches.TripleStitch(Vec2D(0, 0), None, 20),
+            stitches.ZigzagStitch(Vec2D(0, 0), None, 20, 20),
+            stitches.SatinStitch(Vec2D(0, 0), None, 20),
+            stitches.CrossStitch(Vec2D(0, 0), None, 20, 20),
+            stitches.ZStitch(Vec2D(0, 0), None, 20, 20),
         ],
     )
     def test_set_stitch_type_sets_stitch_type(self, turtle, stitch_group):

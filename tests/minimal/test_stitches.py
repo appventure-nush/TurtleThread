@@ -361,7 +361,8 @@ class TestTurtleZigzagStitch:
         zigzag_stitch = stitches.ZigzagStitch(
             start_pos=Vec2D(0, 0), 
             stitch_length=20, 
-            stitch_width=10
+            stitch_width=10,
+            color=None
         )
         commands = list(zigzag_stitch._stitch_unit(Vec2D(0, 0), 0, 20)) 
         assert len(commands) == 2
@@ -373,6 +374,7 @@ class TestTurtleZigzagStitch:
             start_pos=Vec2D(0, 0), 
             stitch_length=20, 
             stitch_width=10,
+            color=None,
             center=True
         )
         commands = list(zigzag_stitch._start_stitch_unit(Vec2D(0, 0), 0, 20)) 
@@ -384,6 +386,7 @@ class TestTurtleZigzagStitch:
             start_pos=Vec2D(0, 0), 
             stitch_length=20, 
             stitch_width=10,
+            color=None,
             center=True
         )
         # Test 1: One additional stitch remaining
@@ -405,6 +408,7 @@ class TestTurtleZigzagStitch:
             start_pos=start_pos, 
             stitch_length=stitch_length, 
             stitch_width=stitch_width,
+            color=None,
             center=center,
             auto_adjust=auto_adjust,
             enforce_start_stitch=True,
@@ -424,7 +428,8 @@ class TestTurtleSatinStitch:
     def test_satin_initialization(self):
         satin_stitch = stitches.SatinStitch(
             start_pos=Vec2D(0, 0), 
-            stitch_width=10
+            stitch_width=10,
+            color=None
         )
         assert isinstance(satin_stitch, stitches.SatinStitch)
 
@@ -436,6 +441,7 @@ class TestTurtleSatinStitch:
         satin_stitch = stitches.SatinStitch(
             start_pos=start_pos, 
             stitch_width=stitch_width,
+            color=None,
             center=center
         )
         satin_stitch.add_location(end_pos)
@@ -452,7 +458,8 @@ class TestTurtleCrossStitch:
         cross_stitch = stitches.CrossStitch(
             start_pos=Vec2D(0, 0), 
             stitch_length=20, 
-            stitch_width=10
+            stitch_width=10,
+            color=None
         )
         commands = list(cross_stitch._stitch_unit(Vec2D(0, 0), 0, 20)) 
         assert len(commands) == 3
@@ -465,6 +472,7 @@ class TestTurtleCrossStitch:
             start_pos=Vec2D(0, 0), 
             stitch_length=20, 
             stitch_width=10,
+            color=None,
             center=True
         )
         commands = list(cross_stitch._start_stitch_unit(Vec2D(0, 0), 0, 20)) 
@@ -476,7 +484,8 @@ class TestTurtleCrossStitch:
             start_pos=Vec2D(0, 0), 
             stitch_length=20, 
             stitch_width=10,
-            center=True
+            center=True,
+            color=None
         )
         commands = list(cross_stitch._end_stitch_unit(Vec2D(0, 0), 0, 20, 0)) 
         assert len(commands) == 1
@@ -496,7 +505,8 @@ class TestTurtleCrossStitch:
             center=center,
             auto_adjust=auto_adjust,
             enforce_start_stitch=True,
-            enforce_end_stitch=True
+            enforce_end_stitch=True,
+            color=None
         )
         cross_stitch.add_location(end_pos)
         commands = cross_stitch.get_stitch_commands()
@@ -513,7 +523,8 @@ class TestTurtleZStitch:
         z_stitch = stitches.ZStitch(
             start_pos=Vec2D(0, 0), 
             stitch_length=20, 
-            stitch_width=10
+            stitch_width=10,
+            color=None
         )
         commands = list(z_stitch._stitch_unit(Vec2D(0, 0), 0, 20)) 
         assert len(commands) == 2
@@ -525,7 +536,8 @@ class TestTurtleZStitch:
             start_pos=Vec2D(0, 0), 
             stitch_length=20, 
             stitch_width=10,
-            center=True
+            center=True,
+            color=None
         )
         commands = list(z_stitch._start_stitch_unit(Vec2D(0, 0), 0, 20)) 
         assert len(commands) == 2
@@ -537,7 +549,8 @@ class TestTurtleZStitch:
             start_pos=Vec2D(0, 0), 
             stitch_length=20, 
             stitch_width=10,
-            center=True
+            center=True,
+            color=None
         )
         commands = list(z_stitch._end_stitch_unit(Vec2D(0, 0), 0, 20, 0)) 
         assert len(commands) == 0
@@ -556,7 +569,8 @@ class TestTurtleZStitch:
             center=center,
             auto_adjust=auto_adjust,
             enforce_start_stitch=True,
-            enforce_end_stitch=True
+            enforce_end_stitch=True,
+            color=None
         )
         z_stitch.add_location(end_pos)
         commands = z_stitch.get_stitch_commands()

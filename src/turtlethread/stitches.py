@@ -422,7 +422,7 @@ class TripleStitch(StitchGroup):
 
     def __init__(self, start_pos: Vec2D, color: str, stitch_length: float) -> None:
         super().__init__(start_pos=start_pos, color=color)
-        self.running_stitch = RunningStitch(start_pos=start_pos, stitch_length=stitch_length)
+        self.running_stitch = RunningStitch(start_pos=start_pos, stitch_length=stitch_length, color=color)
 
     def _get_stitch_commands(self) -> list[tuple[float, float, StitchCommand]]:
         self.running_stitch._positions = self._positions
