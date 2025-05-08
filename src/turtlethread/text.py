@@ -174,7 +174,7 @@ class LetterDrawer():
         # DRAW ONE LETTER OF A FONT WITH A LOADED NAME, GIVEN A COLOUR 
         if fontname in self.loaded_fonts.keys(): 
             try: 
-                drawSVG(turtle, self.loaded_fonts[fontname][lettername], fontsize, colour, thickness, fill, outline, fill_min_y_dist, fill_min_x_dist, full_fill, flip_y) 
+                drawSVG(turtle, self.loaded_fonts[fontname][lettername], fontsize, fontsize, colour, thickness, fill, outline, fill_min_y_dist, fill_min_x_dist, full_fill, flip_y) 
                 #print("DREW SVG")
             except Exception as e: 
                 print("OR, it might be some other error({})".format(e))
