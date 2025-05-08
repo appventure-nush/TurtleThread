@@ -2,6 +2,7 @@ from pyembroidery import JUMP, STITCH, TRIM, COLOR_CHANGE
 import tkinter as tk
 from tkinter.constants import LEFT, RIGHT
 import os
+from tqdm import tqdm
 
 USE_SPHINX_GALLERY = False
 
@@ -74,8 +75,8 @@ def _finish_visualise(done, bye):
             pass
 
 
-def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, speed=6, trace_jump=False, skip=False, 
-                      done=True, bye=True):
+def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, speed=6, trace_jump=False, skip=False,
+                      check_density=True, done=True, bye=True):
     """Use the builtin ``turtle`` library to visualise an embroidery pattern.
 
     Parameters
@@ -95,6 +96,10 @@ def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, spee
         Speed that the turtle object moves at.
     trace_jump : bool
         If True, then draw a grey line connecting the origin and destination of jumps.
+    skip : bool
+        If True, then skip the drawing animation and jump to the completed visualisation.
+    check_density : bool
+        If True, then check the density of the embroidery pattern. Recommended but slow.
     done : bool
         If True, then ``turtle.done()`` will be called after drawing.
     bye : bool
@@ -194,14 +199,12 @@ def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, spee
         text=f"{stitch_count} stitches in total\n{f'{h}h' if h else ''}{f'{m}m' if m else ''}{s:.1f}s (assuming 600spm)",
         justify=RIGHT
     ).pack(anchor="s", side="right")
-
-    if density(pattern.stitches):
+    if check_density and density(pattern.stitches):
         tk.Label(
             root,
             text=f"WARNING: POTENTIAL HIGH STITCH DENSITY",
             fg="#f00"
         ).pack(side="bottom")
-
     if len(pattern.stitches) == 0:
         _finish_visualise(done=done, bye=bye)
         return
@@ -213,7 +216,11 @@ def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, spee
     raise_error = False
     threads = list(pattern.threadlist)
     thread_idx = 0
-    for x, y, command in pattern.stitches:
+    if skip:
+        print("Rendering... (show animation with skip=False)")
+    else:
+        print("Visualising... (skip with skip=True)")
+    for x, y, command in tqdm(pattern.stitches):
         x = scale * x
         y = scale * y
         if command == JUMP:
@@ -295,8 +302,9 @@ def density(stitches):
 
 
 def density_from_points(pts, dist=0.5, num=20):
+    print("Checking density of stitches... (skip with check_density=False)")
     adjmat = [ [ -1 for j in range(len(pts))] for i in range(len(pts))]
-    for i in range(len(pts)):
+    for i in tqdm(range(len(pts))):
         adjmat[i][i] = 1 # close enough 
         for j in range(i+1, len(pts)):
             dx = pts[i][0] - pts[j][0]

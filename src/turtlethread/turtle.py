@@ -484,7 +484,7 @@ class Turtle(TNavigator):
         self.goto(0, 0)
         self.angle = 0
 
-    def visualise(self, turtle=None, width=800, height=800, scale=1, speed=6, trace_jump=False, skip=False, done=True, bye=True):
+    def visualise(self, turtle=None, width=800, height=800, scale=1, speed=6, trace_jump=False, skip=False, check_density=True, done=True, bye=True):
         """Use the builtin ``turtle`` library to visualise this turtle's embroidery pattern.
 
         Parameters
@@ -506,6 +506,8 @@ class Turtle(TNavigator):
             If True, then draw a grey line connecting the origin and destination of jumps.
         skip : bool
             If True, then skip the drawing animation and jump to the completed visualisation.
+        check_density : bool
+            If True, then check the density of the embroidery pattern. Recommended but slow.
         done : bool
             If True, then ``turtle.done()`` will be called after drawing.
         bye : bool
@@ -514,7 +516,8 @@ class Turtle(TNavigator):
         try:
             visualise_pattern(
                 self.pattern.to_pyembroidery(),
-                turtle=turtle, width=width, height=height, scale=scale, speed=speed, trace_jump=trace_jump, skip=skip, done=done, bye=bye
+                turtle=turtle, width=width, height=height, scale=scale, speed=speed, trace_jump=trace_jump, skip=skip, 
+                check_density=check_density, done=done, bye=bye
             )
         except Exception as e:
             print(e)
