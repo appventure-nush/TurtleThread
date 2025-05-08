@@ -40,3 +40,7 @@ html_theme_options = {
         "color-brand-content": "#00BAB7",
     },
 }
+
+html_css_files = [
+    "css/custom.css",
+]

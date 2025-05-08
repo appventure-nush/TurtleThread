@@ -1,0 +1,11 @@
+.sidebar-footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    padding-bottom: 1rem;
+    gap: 1rem;
+}
+
+.sidebar-footer-logo {
+    height: 3rem;
+}
