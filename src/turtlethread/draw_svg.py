@@ -230,6 +230,7 @@ prev_end_pos = (0,0) #"PREV END POS"
 min_turtle_dist = 10 
 
 prev_stitch = None 
+import copy 
 
 def texcor(): 
     return prev_end_pos[0] 
@@ -278,6 +279,8 @@ def move_turtle_to(te:turtlethread.Turtle, x, y):
                 pass 
             else: 
                 #print("DRAWING {} FROM {} TO {}".format(prev_stitch, prev_turtle_pos, prev_end_pos)) 
+                #print("PREV STITCH:", prev_stitch)
+                #print(te._stitch_group_stack[-1])
                 with te.use_stitch_group(prev_stitch): 
                     # then finish this up first before the jump stitch 
                     pex, pey = prev_end_pos 
@@ -288,6 +291,10 @@ def move_turtle_to(te:turtlethread.Turtle, x, y):
                         te.goto(pex, -pey)
                     else: 
                         te.goto(pex, pey) 
+                    
+                    #print(te._stitch_group_stack[-1])
+                    #print(te._stitch_group_stack[-1]._parent_stitch_group)
+                    #print(prev_stitch)
                 
                 prev_turtle_pos = prev_end_pos
             prev_stitch = new_stitch 
@@ -515,9 +522,17 @@ def readPathAttrD(w_attr):
                 curr_parse = ""
             #print(i) 
             yield i
+        elif i == '.' and '.' in curr_parse: 
+            #print(float(curr_parse))
+            yield float(curr_parse) 
+            curr_parse = '0.' 
         else:
             curr_parse += i
         was_e = False 
+    if curr_parse != '': # the svg doesnt end with a Z 
+        #print(float(curr_parse))
+        yield float(curr_parse)
+        yield 'Z'
 
 
 
@@ -814,6 +829,7 @@ def drawSVG(te:turtlethread.Turtle, filename, height, width=None, w_color=None, 
                 firstpos[1] += starty 
 
             for i in SVG.find_all('path'):
+                #print(i.attrs['id']) 
                 attr = i.attrs['d'].replace('\n', ' ')
                 f = readPathAttrD(attr)
                 lastI = ''
@@ -926,7 +942,7 @@ def drawSVG(te:turtlethread.Turtle, filename, height, width=None, w_color=None, 
                         lastI = i
                     elif i == 'Z' or i == 'z': 
                         Lineto(te, startx, starty, *firstpos)
-                    elif lastI == 'C':
+                        '''elif lastI == 'C':
                         Curveto(te, startx, starty, i * scale[0], next(f) * scale[1],
                                 next(f) * scale[0], next(f) * scale[1],
                                 next(f) * scale[0], next(f) * scale[1])
@@ -934,12 +950,68 @@ def drawSVG(te:turtlethread.Turtle, filename, height, width=None, w_color=None, 
                         Curveto_r(te, startx, starty, i * scale[0], next(f) * scale[1],
                                 next(f) * scale[0], next(f) * scale[1],
                                 next(f) * scale[0], next(f) * scale[1])
+                    '''
+                    elif lastI == 'C':
+                        vs = [(i*scale[0], next(f)*scale[1])]
+                        vs += [(next(f) * scale[0], next(f) * scale[1]) for _ in range(2)] 
+                        Curveto(te, startx, starty, *vs[0], *vs[1], *vs[2])
+                        prev_ctrl = vs[1] 
+                    elif lastI == 'c':
+                        vs = [(i*scale[0], next(f)*scale[1])]
+                        vs += [(next(f) * scale[0], next(f) * scale[1]) for _ in range(2)] 
+                        currpos = teposition() 
+                        Curveto_r(te, startx, starty, *vs[0], *vs[1], *vs[2])
+                        prev_ctrl = [vs[1][0]+currpos[0]-startx, starty-(vs[1][1]+currpos[1])] 
+                        #print(vs)
+                    elif lastI == 'S': 
+                        ctrl_point = list(teposition())
+                        Curveto(te, startx, starty, *ctrl_point,
+                                i * scale[0], next(f) * scale[1],
+                                next(f) * scale[0], next(f) * scale[1])
+                    elif lastI=='s': 
+                        currpos = list(teposition()) 
+                        #print(*currpos, prev_ctrl)
+                        #print("START", startx, starty)
+                        ctrl_point = reflect_point(*currpos, prev_ctrl[0]+startx, starty-prev_ctrl[1])
+                        #print(prev_ctrl, ctrl_point, (startx, starty), currpos)
+                        ctrl_point = [ctrl_point[0]-currpos[0], currpos[1]-ctrl_point[1]]
+                        #print("REF")
+                        Curveto_r(te, startx, starty, *ctrl_point,
+                                i * scale[0], next(f) * scale[1],
+                                next(f) * scale[0], next(f) * scale[1])
+                    elif lastI == 'Q': 
+                        vs = [(i*scale[0], next(f)*scale[1])]
+                        vs += [(next(f) * scale[0], next(f) * scale[1]) for _ in range(1)] 
+                        #print("TEPOS", *teposition())
+                        Quadto(te, startx, starty, *vs[0], *vs[1]) 
+                        prev_ctrl = vs[0] 
+                    elif lastI == 'q': 
+                        currpos = list(teposition()) 
+                        X_now, Y_now = currpos 
+                        vs = [(i*scale[0], next(f)*scale[1])]
+                        vs += [(next(f) * scale[0], next(f) * scale[1]) for _ in range(1)] 
+                        Quadto_r(te, startx, starty, *vs[0], *vs[1]) 
+                        prev_ctrl = [vs[0][0]+currpos[0], vs[0][1]+currpos[1]] 
+                    elif lastI == 'T': 
+                        ctrl_point = list(teposition())
+                        Quadto(te, startx, starty, *ctrl_point,
+                                next(f) * scale[0], next(f) * scale[1],)
+                    elif lastI == 't': 
+                        currpos = list(teposition())
+                        #print("PREV CTRL", prev_ctrl)
+                        ctrl_point = reflect_point(*currpos, prev_ctrl[0]+startx, starty-prev_ctrl[1])
+                        ctrl_point = [ctrl_point[0]-currpos[0], currpos[1]-ctrl_point[1]]
+                        #print("REF")
+                        Quadto_r(te, startx, starty, *ctrl_point,
+                                next(f) * scale[0], next(f) * scale[1],)
+
                     elif lastI == 'L':
                         Lineto(te, startx, starty, i * scale[0], next(f) * scale[1])
                     elif lastI == 'l':
                         Lineto_r(te, i * scale[0], next(f) * scale[1])
                     else: 
                         print("ERROR", i)
+                        print("LASTI:", lastI)
 
 
 
@@ -1140,7 +1212,7 @@ def _fake_drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickn
                     lastI = i
                 elif i == 'Z' or i == 'z': 
                     Lineto(te, startx, starty, *firstpos)
-                elif lastI == 'C':
+                    '''elif lastI == 'C':
                     Curveto(te, startx, starty, i * scale[0], next(f) * scale[1],
                             next(f) * scale[0], next(f) * scale[1],
                             next(f) * scale[0], next(f) * scale[1])
@@ -1148,12 +1220,69 @@ def _fake_drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickn
                     Curveto_r(te, startx, starty, i * scale[0], next(f) * scale[1],
                             next(f) * scale[0], next(f) * scale[1],
                             next(f) * scale[0], next(f) * scale[1])
+                '''
+                elif lastI == 'C':
+                    vs = [(i*scale[0], next(f)*scale[1])]
+                    vs += [(next(f) * scale[0], next(f) * scale[1]) for _ in range(2)] 
+                    Curveto(te, startx, starty, *vs[0], *vs[1], *vs[2])
+                    prev_ctrl = vs[1] 
+                elif lastI == 'c':
+                    vs = [(i*scale[0], next(f)*scale[1])]
+                    vs += [(next(f) * scale[0], next(f) * scale[1]) for _ in range(2)] 
+                    currpos = teposition() 
+                    Curveto_r(te, startx, starty, *vs[0], *vs[1], *vs[2])
+                    prev_ctrl = [vs[1][0]+currpos[0]-startx, starty-(vs[1][1]+currpos[1])] 
+                    #print(vs)
+                elif lastI == 'S': 
+                    ctrl_point = list(teposition())
+                    Curveto(te, startx, starty, *ctrl_point,
+                            i * scale[0], next(f) * scale[1],
+                            next(f) * scale[0], next(f) * scale[1])
+                elif lastI=='s': 
+                    currpos = list(teposition()) 
+                    #print(*currpos, prev_ctrl)
+                    #print("START", startx, starty)
+                    ctrl_point = reflect_point(*currpos, prev_ctrl[0]+startx, starty-prev_ctrl[1])
+                    #print(prev_ctrl, ctrl_point, (startx, starty), currpos)
+                    ctrl_point = [ctrl_point[0]-currpos[0], currpos[1]-ctrl_point[1]]
+                    #print("REF")
+                    Curveto_r(te, startx, starty, *ctrl_point,
+                            i * scale[0], next(f) * scale[1],
+                            next(f) * scale[0], next(f) * scale[1])
+                elif lastI == 'Q': 
+                    vs = [(i*scale[0], next(f)*scale[1])]
+                    vs += [(next(f) * scale[0], next(f) * scale[1]) for _ in range(1)] 
+                    #print("TEPOS", *teposition())
+                    Quadto(te, startx, starty, *vs[0], *vs[1]) 
+                    prev_ctrl = vs[0] 
+                elif lastI == 'q': 
+                    currpos = list(teposition()) 
+                    X_now, Y_now = currpos 
+                    vs = [(i*scale[0], next(f)*scale[1])]
+                    vs += [(next(f) * scale[0], next(f) * scale[1]) for _ in range(1)] 
+                    Quadto_r(te, startx, starty, *vs[0], *vs[1]) 
+                    prev_ctrl = [vs[0][0]+currpos[0], vs[0][1]+currpos[1]] 
+                elif lastI == 'T': 
+                    ctrl_point = list(teposition())
+                    Quadto(te, startx, starty, *ctrl_point,
+                            next(f) * scale[0], next(f) * scale[1],)
+                elif lastI == 't': 
+                    currpos = list(teposition())
+                    #print("PREV CTRL", prev_ctrl)
+                    ctrl_point = reflect_point(*currpos, prev_ctrl[0]+startx, starty-prev_ctrl[1])
+                    ctrl_point = [ctrl_point[0]-currpos[0], currpos[1]-ctrl_point[1]]
+                    #print("REF")
+                    Quadto_r(te, startx, starty, *ctrl_point,
+                            next(f) * scale[0], next(f) * scale[1],)
+
                 elif lastI == 'L':
                     Lineto(te, startx, starty, i * scale[0], next(f) * scale[1])
                 elif lastI == 'l':
                     Lineto_r(te, i * scale[0], next(f) * scale[1])
                 else: 
                     print("ERROR", i)
+                    print("LASTI:", lastI)
+
 
 
     with te.jump_stitch(): 

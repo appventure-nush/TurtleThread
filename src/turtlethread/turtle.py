@@ -321,7 +321,7 @@ class Turtle(TNavigator):
     def use_stitch_group(self, stitch_group):
         self.set_stitch_type(stitch_group=stitch_group)
         yield
-        if self._stitch_group_stack[-1]._parent_stitch_group is not stitch_group:
+        if (self._stitch_group_stack[-1]._parent_stitch_group is not stitch_group) and (self._stitch_group_stack[-1] is not stitch_group):
             raise RuntimeError(
                 "Inconsistent state, likely caused by explicitly calling `cleanup_stitch_type` within a"
                 + " stitch group context (e.g. within a `with turtle.running_stitch(20):` block)."
