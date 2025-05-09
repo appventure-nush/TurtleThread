@@ -2,7 +2,7 @@ FROM python:3.12-alpine AS build
 
 WORKDIR /app 
 
-RUN apk add make
+RUN apk add make python3-tkinter
 
 COPY src/ ./src
 COPY requirements.txt .
