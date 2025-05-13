@@ -9,7 +9,7 @@ name = "turtlethread"
 keywords = [
     "turtlethread",
 ]
-version = "0.2.1"
+version = "0.2.2"
 description = "A Turtle-interface for making embroidery files"
 authors = [
     { name = "Wong Yue Heng, Tan Junheng and Yu Simu", email = "appventure@nushigh.edu.sg" },
