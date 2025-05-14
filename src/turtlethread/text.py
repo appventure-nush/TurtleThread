@@ -66,9 +66,17 @@ class LetterDrawer():
 
     font_search_score_threshold = 90 
     # if we want to use .otf or whatever font files 
-    def load_font(self, fontname:str, fontpath:str=None, search_threshold=None): 
+    def load_font(self, fontname:str, fontpath:str=None, search_threshold=None, force_reload:bool=False): 
         # Loads a font file from a fontpath, and gives it a name to be referred to. 
         # if no fontpath specified, will try to find it in system files 
+
+
+        # check cache 
+        if os.path.isdir('.fontcache/'+fontname) and not force_reload:
+            self._add_font_paths(fontname, '.fontcache/'+fontname)
+            return fontname
+
+
 
         if fontpath is None: 
             # set search threshold 
@@ -90,9 +98,12 @@ class LetterDrawer():
             raise ValueError("Could not find font in system files: "+str(res_ttf+res_otf)) 
 
 
-        td = tempfile.TemporaryDirectory() 
-        self.created_tmpdirs.append(td) 
-        tmpdirname = td.name 
+        #td = tempfile.TemporaryDirectory() 
+        #self.created_tmpdirs.append(td) 
+        #tmpdirname = td.name 
+        tmpdirname = '.fontcache/'+fontname 
+        if not os.path.isdir(tmpdirname):
+            os.makedirs(tmpdirname) 
 
         # processs text format: convert to svg first 
 
@@ -105,12 +116,17 @@ class LetterDrawer():
 
         fonts2svg.processFonts(font_paths_list, hex_colors_list, output_folder_path, opts) 
         # font SVGs are now in tmpdirname 
+        
+        self._add_font_paths(fontname, tmpdirname) 
+
+        return fontpath 
 
 
+    def _add_font_paths(self, fontname, savedir):
         # get the paths to the font SVGs 
         paths = {}
             
-        for rt, _, files in os.walk(tmpdirname):
+        for rt, _, files in os.walk(savedir):
             for i in range(len(files)):
                 try: 
                     paths[files[i][:files[i].index('.svg')]] = os.path.join(rt, files[i])
@@ -119,7 +135,7 @@ class LetterDrawer():
 
         self.loaded_fonts[fontname] = paths 
 
-        return fontpath 
+        
     
     def get_loaded_fontnames(self): 
         # get a list of names of fonts that are already loaded 
