@@ -6,6 +6,32 @@ from tqdm import tqdm
 
 USE_SPHINX_GALLERY = False
 
+# Check if in IDLE, disable if so
+import sys
+
+class non_idle_tqdm:
+    def __init__(self, iterable, *args, **kwargs):
+        self.iterable = iterable
+        if 'idlelib.run' not in sys.modules:
+            self.tqdm = tqdm
+        else:
+            self.tqdm = None
+
+    def __iter__(self):
+        if self.tqdm is not None:
+            return iter(self.tqdm(self.iterable))
+        else:
+            return iter(self.iterable)
+
+class no_tqdm:
+    def __init__(self, iterable, *args, **kwargs):
+        self.iterable = iterable
+
+    def __iter__(self):
+        return iter(self.iterable)
+
+    def __call__(self, *args, **kwargs):
+        return iter(self.iterable)
 
 def get_dimensions(stitches):
     if len(stitches) == 0: return 0, 0
@@ -216,11 +242,15 @@ def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, spee
     raise_error = False
     threads = list(pattern.threadlist)
     thread_idx = 0
+    progressbar = non_idle_tqdm
     if skip:
         print("Rendering... (show animation with skip=False)")
+        progressbar = no_tqdm
     else:
         print("Visualising... (skip with skip=True)")
-    for x, y, command in tqdm(pattern.stitches):
+        if len(pattern.stitches) < 50:
+            progressbar = no_tqdm
+    for x, y, command in progressbar(pattern.stitches):
         x = scale * x
         y = scale * y
         if command == JUMP:
@@ -304,7 +334,10 @@ def density(stitches):
 def density_from_points(pts, dist=0.5, num=20):
     print("Checking density of stitches... (skip with check_density=False)")
     adjmat = [ [ -1 for j in range(len(pts))] for i in range(len(pts))]
-    for i in tqdm(range(len(pts))):
+    progressbar = non_idle_tqdm
+    if len(pts) < 5000:
+        progressbar = no_tqdm
+    for i in progressbar(range(len(pts))):
         adjmat[i][i] = 1 # close enough 
         for j in range(i+1, len(pts)):
             dx = pts[i][0] - pts[j][0]
