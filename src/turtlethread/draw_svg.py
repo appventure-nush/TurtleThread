@@ -20,6 +20,7 @@ save_to_debug = False
 
 import turtlethread 
 from turtlethread import fills
+from turtlethread import stitches 
 from bs4 import BeautifulSoup
 
 from concurrent.futures import ThreadPoolExecutor # to speed up computation 
@@ -334,7 +335,22 @@ def move_turtle_to(te:turtlethread.Turtle, x, y):
                 te.goto(pex, pey) 
         
 
-        # then travel the remaining distance 
+        # then travel the remaining distance -- split into steps so we can always use direct stitch 
+        dx = x-pex 
+        dy = y-pey 
+        m = math.sqrt(dx*dx + dy*dy) 
+        i = 1 
+        while (i+1)*min_turtle_dist < m: 
+            i += 1 
+        fdx = dx/i 
+        fdy = dy/i 
+        for _ in range(i-1): 
+            if save_to_debug: 
+                debug.append((pex+fdx*i, pey+fdy*i))
+            if flip_y: 
+                te.goto(pex+fdx*i, -(pey+fdy*i))
+            else: 
+                te.goto(pex+fdx*i, pey+fdy*i)
         if save_to_debug: 
             debug.append((x, y)) 
         if flip_y: 
@@ -409,25 +425,22 @@ def line(te, startx, starty, x1, y1, x2, y2):  # 连接svg坐标下两点
     with te.jump_stitch(): 
         move_turtle_to(te, startx + x1, starty - y1)
     #te.pendown()
-    with te.running_stitch(30): 
-        move_turtle_to(te, startx + x2, starty - y2) 
+    move_turtle_to(te, startx + x2, starty - y2) 
     #te.penup()
 
 
 def Lineto_r(te, dx, dy):  # 连接当前点和相对坐标（dx，dy）的点
     #te.pendown()
-    with te.running_stitch(30): 
-        if flip_y: 
-            move_turtle_to(te, texcor() + dx, -teycor() - dy) 
-        else: 
-            move_turtle_to(te, texcor() + dx, teycor() - dy) 
+    if flip_y: 
+        move_turtle_to(te, texcor() + dx, -teycor() - dy) 
+    else: 
+        move_turtle_to(te, texcor() + dx, teycor() - dy) 
     #te.penup()
 
 
 def Lineto(te, startx, starty, x, y):  # 连接当前点和svg坐标下（x，y）
     #te.pendown()
-    with te.running_stitch(30): 
-        move_turtle_to(te, startx + x, starty - y) 
+    move_turtle_to(te, startx + x, starty - y) 
     #te.penup()
 
 
@@ -483,6 +496,8 @@ def Quadto_r(te, startx, starty, x1, y1, x, y):  # 三阶贝塞尔曲线到相�
     currpos = teposition() 
     Bezier_2(te, X_now, Y_now, currpos[0] + x1, currpos[1] + y1,
              currpos[0] + x, currpos[1] + y)
+    '''Bezier_2(te, X_now, Y_now, X_now + x1, Y_now + y1,
+            X_now + x, Y_now + y)'''
 
 
 
@@ -543,7 +558,7 @@ def reflect_point(cx, cy, px, py):
     return 2*cx - px, 2*cy - py
 
 
-def drawSVG(te:turtlethread.Turtle, filename, height, width=None, w_color=None, thickness=1, fill=True, outline=False, fill_min_y_dist:int=10, fill_min_x_dist=10, full_fill=True, flip_y_in:bool=False): # TODO consider colour 
+def drawSVG(te:turtlethread.Turtle, filename, height, width=None, w_color=None, thickness=1, fill=True, outline=False, fill_min_y_dist:int=10, fill_min_x_dist=10, full_fill=True, outline_satin_thickness=None, flip_y_in:bool=False): # TODO consider colour 
     """Function to draw an SVG file with a turtle. 
     
     Parameters 
@@ -562,6 +577,8 @@ def drawSVG(te:turtlethread.Turtle, filename, height, width=None, w_color=None, 
         If True, the SVG will be outlined. Default is False.
     full_fill : bool, optional
         If True, the SVG will be fully filled if set to fill, otherwise it will be partialy filled. Default is True.
+    outline_satin_thickness : int, optional, can be None 
+        If not None, the SVG's lines will use satin stitch rather than direct stitch 
     fill_min_y_dist : int, optional
         The minimum distance between fill points in the y direction. Default is 10 (1mm).
     fill_min_x_dist : int, optional
@@ -792,7 +809,7 @@ def drawSVG(te:turtlethread.Turtle, filename, height, width=None, w_color=None, 
                 #with te.jump_stitch(): 
                 #    #print("WITH JUMP STITCH:", te._stitch_group_stack[-1] )
                 #    move_turtle_to(te, startx+p1[0], starty+p1[1]) 
-                with te.direct_stitch(): 
+                with te.fast_direct_stitch(): 
                     #print("WITH RUNNING STITCH:", te._stitch_group_stack[-1] )
                     move_turtle_to(te, startx+p2[0], starty+p2[1]) 
 
@@ -808,7 +825,11 @@ def drawSVG(te:turtlethread.Turtle, filename, height, width=None, w_color=None, 
     if outline: 
         debug = []
         te.begin_fill(closed=False)
-        with te.direct_stitch(): # 99999 will make sure we won't have gaps 
+        if outline_satin_thickness is None: 
+            stitch_grp = turtlethread.stitches.DirectStitch(te.pos(), te.curr_color)
+        else: 
+            stitch_grp = turtlethread.stitches.SatinStitch(te.pos(), te.curr_color, outline_satin_thickness, center=True)
+        with te.use_stitch_group(stitch_grp): # 99999 will make sure we won't have gaps 
             #te.color(w_color) # TODO SWITCH COLOUR OF TEXT 
 
             def get_position(): 
@@ -833,6 +854,7 @@ def drawSVG(te:turtlethread.Turtle, filename, height, width=None, w_color=None, 
                 attr = i.attrs['d'].replace('\n', ' ')
                 f = readPathAttrD(attr)
                 lastI = ''
+                firstpos = None 
                 for i in f:
                     #print(i) 
                     # if i.lower() in ['c', 'q', 'l', 'h' 'v', 'z']: 
@@ -842,10 +864,12 @@ def drawSVG(te:turtlethread.Turtle, filename, height, width=None, w_color=None, 
                         #te.end_fill()
                         Moveto(te, startx, starty, next(f) * scale[0], next(f) * scale[1])
                         #te.begin_fill()
+                        #if firstpos is None: 
                         set_firstpos() 
                     elif i == 'm':
                         #te.end_fill()
                         Moveto_r(te, next(f) * scale[0], next(f) * scale[1])
+                        #if firstpos is None: 
                         set_firstpos() 
                         #te.begin_fill()
                     elif i == 'C':
@@ -871,7 +895,7 @@ def drawSVG(te:turtlethread.Turtle, filename, height, width=None, w_color=None, 
                                 next(f) * scale[0], next(f) * scale[1],
                                 next(f) * scale[0], next(f) * scale[1])
                         lastI = i
-                    elif i=='s': 
+                    elif i=='s':
                         if lastI.lower() == 'c': 
                             currpos = list(teposition()) 
                             #print(*currpos, prev_ctrl)
@@ -918,7 +942,7 @@ def drawSVG(te:turtlethread.Turtle, filename, height, width=None, w_color=None, 
                             ctrl_point = [ctrl_point[0]-currpos[0], currpos[1]-ctrl_point[1]]
                             #print("REF")
                         else: 
-                            ctrl_point = list(teposition())
+                            ctrl_point = list(teposition()) #[0,0]
                         Quadto_r(te, startx, starty, *ctrl_point,
                                 next(f) * scale[0], next(f) * scale[1],)
                         lastI = i
@@ -1082,7 +1106,7 @@ def _fake_drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickn
     starty += round(Height) # just to fix the calculations below, since the origin is somewhere else 
     if outline: 
         debug = [] 
-        with te.running_stitch(30): # 99999 will make sure we won't have gaps 
+        with te.direct_stitch(): # 99999 will make sure we won't have gaps 
 
             def get_position(): 
                 posx, posy = teposition() 

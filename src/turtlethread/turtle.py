@@ -548,6 +548,8 @@ class Turtle(TNavigator):
             Factor the embroidery length's are scaled by.
         speed : int
             Speed that the turtle object moves at.
+        extra_speed : int 
+            Extra speed boost on top of everything. Defaults to 1, which is no speed boost. 0 is infinite speed boost 
         trace_jump : bool
             If True, then draw a grey line connecting the origin and destination of jumps.
         skip : bool
