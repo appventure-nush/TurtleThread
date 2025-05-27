@@ -530,7 +530,7 @@ class Turtle(TNavigator):
             # Errors when you close the window! Yikes
             pass
     
-    def fast_visualise(self, turtle=None, width=800, height=800, scale=1, speed=6, trace_jump=False, skip=False, check_density=True, done=True, bye=True):
+    def fast_visualise(self, turtle=None, width=800, height=800, scale=1, speed=6, extra_speed=1, trace_jump=False, skip=False, check_density=True, done=True, bye=True):
         """A fast version of the visualise() function, though it has undergone less testing.
 
         Parameters
@@ -562,7 +562,7 @@ class Turtle(TNavigator):
         try:
             fast_visualise(
                 self,
-                turtle=turtle, width=width, height=height, scale=scale, speed=speed, trace_jump=trace_jump, skip=skip, 
+                turtle=turtle, width=width, height=height, scale=scale, speed=speed, extra_speed=extra_speed, trace_jump=trace_jump, skip=skip, 
                 check_density=check_density, done=done, bye=bye
             )
         except Exception as e:

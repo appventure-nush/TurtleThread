@@ -30,7 +30,7 @@ class Fonts2SVGFakeOptions(): # this just makes it easier
 
 
 class LetterDrawer(): 
-    letter_gap = 0.03 
+    letter_gap = -0.1 
     line_spacing = 1.15 
 
     def __init__(self, turtle, load_common_fonts:bool=False): 
@@ -275,7 +275,7 @@ class LetterDrawer():
             if string[cidx] in ['\n', '\r']: 
                 # newline 
                 with turtle.jump_stitch(): 
-                    starty -= fontsize*LetterDrawer.line_spacing
+                    starty += fontsize*LetterDrawer.line_spacing
                     turtle.goto(startx, starty) 
                 continue 
             if isinstance(colours, str): 
@@ -312,7 +312,7 @@ class LetterDrawer():
         if string[cidx] in ['\n', '\r']: 
             # newline 
             with turtle.jump_stitch(): 
-                starty -= fontsize*LetterDrawer.line_spacing
+                starty += fontsize*LetterDrawer.line_spacing
                 turtle.goto(startx, starty) 
         else: 
             if isinstance(colours, str): 

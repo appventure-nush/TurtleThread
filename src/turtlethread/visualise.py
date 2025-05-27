@@ -359,7 +359,7 @@ def density_from_points(pts, dist=0.5, num=20):
 
 
 from . import stitches 
-def fast_visualise(te, turtle=None, width=800, height=800, scale=1, speed=6, trace_jump=False, skip=False,
+def fast_visualise(te, turtle=None, width=800, height=800, scale=1, speed=0, extra_speed=1, trace_jump=False, skip=False,
                       check_density=True, done=True, bye=True):
     """Use the builtin ``turtle`` library to visualise an embroidery pattern.
 
@@ -517,8 +517,9 @@ def fast_visualise(te, turtle=None, width=800, height=800, scale=1, speed=6, tra
         #speedup |= isinstance(te.pattern.stitch_groups[i]._parent_stitch_group, stitches.SatinStitch) 
         speedup = te.pattern.stitch_groups[i].__class__.speedup 
         if speedup: 
-            prev_refresh_rate = turtle._tracer() 
-            turtle._tracer(prev_refresh_rate+speedup)
+            turtle._tracer(extra_speed+speedup)
+        else: 
+            turtle._tracer(extra_speed)
         
         #for x, y, command in progressbar(pattern.stitches):
         for x, y, command in te.pattern.get_pyembroidery_of(i).stitches: 
@@ -572,8 +573,6 @@ def fast_visualise(te, turtle=None, width=800, height=800, scale=1, speed=6, tra
                 raise_error = True
                 break
 
-        if speedup: 
-            turtle._tracer(prev_refresh_rate)
 
     if skip:
         turtle._update()
