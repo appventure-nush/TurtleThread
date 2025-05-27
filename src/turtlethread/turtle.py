@@ -9,7 +9,7 @@ from . import stitches
 from . import fills
 from .base_turtle import TNavigator, Vec2D
 from .pattern_info import show_info
-from .visualise import visualise_pattern
+from .visualise import visualise_pattern, fast_visualise
 
 USE_SPHINX_GALLERY = False
 
@@ -182,7 +182,7 @@ class Turtle(TNavigator):
 
         super().circle(radius=radius, extent=extent, steps=steps)
 
-    def start_running_stitch(self, stitch_length):
+    def start_running_stitch(self, stitch_length=30):
         """Set the stitch mode to running stitch (not recommended, use ``running_stitch``-context instead).
 
         With a running stitch, we get stitches with a constant distance between each stitch.
@@ -290,6 +290,9 @@ class Turtle(TNavigator):
 
     def start_direct_stitch(self):
         self.set_stitch_type(stitches.DirectStitch(self.pos()))
+    
+    def start_fast_direct_stitch(self):
+        self.set_stitch_type(stitches.FastDirectStitch(self.pos()))
 
     def cleanup_stitch_type(self):
         """Cleanup after switching stitch type."""
@@ -331,7 +334,7 @@ class Turtle(TNavigator):
 
         self.cleanup_stitch_type()
 
-    def running_stitch(self, stitch_length):
+    def running_stitch(self, stitch_length=30):
         """Set the stitch mode to running stitch and cleanup afterwards.
 
         With a running stitch, we get stitches with a constant distance between each stitch.
@@ -444,6 +447,9 @@ class Turtle(TNavigator):
 
     def direct_stitch(self):
         return self.use_stitch_group(stitches.DirectStitch(self.pos(), self.curr_color))
+    
+    def fast_direct_stitch(self):
+        return self.use_stitch_group(stitches.FastDirectStitch(self.pos(), self.curr_color))
 
     @property
     def _position(self):
@@ -516,6 +522,46 @@ class Turtle(TNavigator):
         try:
             visualise_pattern(
                 self.pattern.to_pyembroidery(),
+                turtle=turtle, width=width, height=height, scale=scale, speed=speed, trace_jump=trace_jump, skip=skip, 
+                check_density=check_density, done=done, bye=bye
+            )
+        except Exception as e:
+            print(e)
+            # Errors when you close the window! Yikes
+            pass
+    
+    def fast_visualise(self, turtle=None, width=800, height=800, scale=1, speed=6, trace_jump=False, skip=False, check_density=True, done=True, bye=True):
+        """A fast version of the visualise() function, though it has undergone less testing.
+
+        Parameters
+        ----------
+        pattern : pyembroidery.EmbPattern
+            Embroidery pattern to visualise
+        turtle : turtle.Turtle (optional)
+            Python turtle object to use for drawing. If not specified, then the default turtle
+            is used.
+        width : int
+            Canvas width
+        height : int
+            Canvas height
+        scale : int
+            Factor the embroidery length's are scaled by.
+        speed : int
+            Speed that the turtle object moves at.
+        trace_jump : bool
+            If True, then draw a grey line connecting the origin and destination of jumps.
+        skip : bool
+            If True, then skip the drawing animation and jump to the completed visualisation.
+        check_density : bool
+            If True, then check the density of the embroidery pattern. Recommended but slow.
+        done : bool
+            If True, then ``turtle.done()`` will be called after drawing.
+        bye : bool
+            If True, then ``turtle.bye()`` will be called after drawing.
+        """
+        try:
+            fast_visualise(
+                self,
                 turtle=turtle, width=width, height=height, scale=scale, speed=speed, trace_jump=trace_jump, skip=skip, 
                 check_density=check_density, done=done, bye=bye
             )

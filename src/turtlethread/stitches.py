@@ -49,6 +49,20 @@ class EmbroideryPattern:
 
         return pattern
 
+    def get_pyembroidery_of(self, stitch_group_idx): 
+        """Get the PyEmbroidery pattern with the stitch commands of the i-th stitch group"""
+        pattern = pyembroidery.EmbPattern()
+        stitch_group = self.stitch_groups[stitch_group_idx]
+        if (not isinstance(stitch_group, JumpStitch)) and stitch_group.color is not None: 
+            pattern += stitch_group.color 
+
+        scaled_stitch_commands = (
+            (x * self.scale, y * self.scale, cmd) for x, y, cmd in stitch_group.get_stitch_commands()
+        )
+        pattern.stitches.extend(scaled_stitch_commands)
+
+        return pattern
+
     def get_stitch_command(self) -> list[tuple[float, float, StitchCommand]]:
         """Get stitch commands for PyEmbroidery.
 
@@ -60,6 +74,7 @@ class EmbroideryPattern:
 
 
 class StitchGroup(ABC):
+    speedup=0 
     """Object representing one contiguous set of commands for the embroidery machine.
 
     Stitch groups are used to convert the Turtle commands into embroidery machine commands. For example, if you want to
@@ -579,6 +594,7 @@ class SatinStitch(ZigzagStitch):
     """Stitch group for satin stitches.
     A satin stitch is simply a zigzag stitch with a tight density. This creates a solid fill.
     We use 0.3mm for the density."""
+    speedup=1
     
     def __init__(self, start_pos: Vec2D, color: str, stitch_width: int | float, center: bool = True) -> None:
         super().__init__(start_pos=start_pos, color=color, stitch_width=stitch_width, stitch_length=3, center=center)
@@ -755,3 +771,8 @@ class DirectStitch(StitchGroup):
             stitch_commands.extend(self._iter_stitches_between_positions(pos1, pos2))
 
         return stitch_commands
+
+
+class FastDirectStitch(DirectStitch):
+    """A variation of direct stitch that will be fast when using fast_visualise """
+    speedup = 2 

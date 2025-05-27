@@ -132,7 +132,7 @@ class ScanlineFill(Fill):
             prev_line = None
             jump = False
             for i in range(start_idx, len(scanned_lines) - 1): # For each scanned line
-                with turtle.direct_stitch():
+                with turtle.fast_direct_stitch():
                     if len(scanned_lines[i]) >= 2: # If there are at least 2 coordinates, there needs to be a stitch between them!
                         no_fill_in_current_iteration_flag = False # Something was filled this iteration! For while loop to continue
                         stitch_rot = (
