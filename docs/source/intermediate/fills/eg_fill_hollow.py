@@ -26,4 +26,4 @@ with t.running_stitch(25):
 
 t.end_fill()
 
-t.visualise()
+t.fast_visualise() # fast_visualise because fills can take a long time 

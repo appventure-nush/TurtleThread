@@ -119,6 +119,9 @@ we set ``outline=True``.
 Outlining text is recommended for relatively small text sizes (less than 150), and preferred over fill as the fill can
 get messy with small text sizes. 
 
+We can also choose to use satin stitch for a cleaner outline of the text by setting the ``outline_satin_thickness`` 
+paramter, however this will make the code take much longer to run. 
+
 We can also choose whether or not to fill text. We can either choose no fill, partial fill, or full fill. The below
 code illustrates the three possibilities.
 
@@ -152,7 +155,7 @@ Here is an example of the text functionality in TurtleThread.
 
 .. literalinclude:: text/eg_text_walkthrough.py
     :language: python
-    :lines: 1-15
+    :lines: 1-25
     :linenos:
 
 .. image:: ../../_static/figures/text/example.png 
@@ -168,3 +171,5 @@ Unpacking the above code:
   - **Line 10:** ``ld.draw_letter_gap(fontsize)`` is used to draw the gap between two letters, and should be used with ``draw_one_letter``.
 
   - **Line 11:** ``ld.draw_string`` is similar to ``ld.draw_one_letter`` except it draws an entire string instead. Also, instead of parameters named ``fill`` and ``outline``, it has the parameters ``fills`` and ``outlines``, which can be a single boolean value or a list of boolean values. 
+
+  - **Line 25:** ``te.fast_visualise()`` function will visualise the drawing faster, as text fill may take a long time. 

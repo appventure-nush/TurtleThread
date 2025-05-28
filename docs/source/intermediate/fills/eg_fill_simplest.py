@@ -14,4 +14,4 @@ with t.running_stitch(25):
 # You must call the end_fill() function, or the shape will not be filled!
 t.end_fill()
 
-t.visualise(scale=2)
+t.fast_visualise(scale=2) # fast_visualise because fills can take a long time 

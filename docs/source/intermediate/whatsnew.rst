@@ -57,7 +57,7 @@ Exporting for Embroidery
 The key purpose of TurtleThread is to allow for designs to be embroidered into reality. As such, knowing how to prepare 
 files for embroidery is essential.
 
-Firstly, ensure that you call the ``turtle.visualise()`` function. From the bottom of the interface, the estimated time
+Firstly, ensure that you call the ``turtle.visualise()`` or ``turtle.fast_visualise()`` function. From the bottom of the interface, the estimated time
 for how long the pattern will take to embroider is displayed, as well as the number of stitches if you wish to 
 calculate the time needed for your embroidery machine.
 

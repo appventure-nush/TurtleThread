@@ -22,4 +22,4 @@ with turtlethread.LetterDrawer(turtle) as ld:
     ld.draw_string("Arial", "PLE", 120, fills=True, outlines=True, full_fill=False) # Prtial fill - best used with outline 
 
 # From here on, this unindented code cannot use LetterDrawer. 
-turtle.visualise()
+turtle.fast_visualise() # use fast visualization as fills can take a long time 
