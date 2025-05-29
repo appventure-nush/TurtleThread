@@ -617,6 +617,8 @@ class Turtle(TNavigator):
 
 
     def color(self, newcol: str): 
+        if newcol == self.curr_color: 
+            return  # make no change, to avoid asking the user to repeatedly change thread 
         # We need to change the stitch group so that the color change is reflected!
         if self._stitch_group_stack:
             previous_stitch_group = self._stitch_group_stack.pop()

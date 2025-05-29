@@ -40,7 +40,12 @@ class EmbroideryPattern:
         pattern = pyembroidery.EmbPattern()
         for stitch_group in self.stitch_groups:
             if (not isinstance(stitch_group, JumpStitch)) and stitch_group.color is not None: 
-                pattern += stitch_group.color 
+                change_col = True 
+                if len(pattern.threadlist) > 0: 
+                    change_col = (pattern.threadlist[-1].hex_color() != pyembroidery.EmbThread(stitch_group.color).hex_color())
+                
+                if change_col: 
+                    pattern += stitch_group.color 
 
             scaled_stitch_commands = (
                 (x * self.scale, y * self.scale, cmd) for x, y, cmd in stitch_group.get_stitch_commands()
