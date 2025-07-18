@@ -80,12 +80,12 @@ Note that if your letter gap is too small or large, you can adjust the ratio by 
  
 .. literalinclude:: text/eg_letter_gap.py
     :language: python
-    :emphasize-lines: 6
+    :emphasize-lines: 16
     :linenos:
 
 .. image:: ../../_static/figures/text/draw_letter_gap_01.png 
 
-The default letter gap is ``0.03``. 
+The default letter gap scale factor is ``-0.1``. 
 
 Drawing Strings (``ld.draw_string``)
 ------------------------------------

@@ -53,6 +53,8 @@ class LetterDrawer():
                 self.load_font("Comic") # comic sans 
             except: 
                 pass 
+        
+        self.prev_fontsize = None 
 
 
     # context manager functions 
@@ -142,7 +144,7 @@ class LetterDrawer():
         return list(self.loaded_fonts.keys()) 
 
 
-    def draw_one_letter(self, fontname, lettername, fontsize=20, colour='#000000', thickness=1, fill=False, outline=True, fill_min_y_dist:int=10, fill_min_x_dist=10, full_fill=True, outline_satin_thickness=None, turtle=None, flip_y=False): 
+    def draw_one_letter(self, fontname, lettername, fontsize=120, colour='#000000', thickness=1, fill=False, outline=True, fill_min_y_dist:int=10, fill_min_x_dist=10, full_fill=True, outline_satin_thickness=None, turtle=None, flip_y=False): 
         """This function draws a single letter.
 
         Parameters
@@ -173,6 +175,8 @@ class LetterDrawer():
             If ``partial_fill`` is taking too long, consider increasing this value to make it run faster, at the cost of a lower resolution of fill.
             Default value is 10, and this should never be set below 5.
         """
+        self.prev_fontsize = fontsize 
+
         # draws one letter with the turtles, with the specified fields. 
         # turtle defaults to self.turtle 
         if turtle is None: 
@@ -203,7 +207,20 @@ class LetterDrawer():
         
         return 
     
-    def draw_letter_gap(self, fontsize, letter_gap=None): 
+    def draw_letter_gap(self, fontsize=None, letter_gap=None): 
+        '''
+        Draws a gap between two letters. 
+        
+        Parameters 
+        ----------
+        fontsize : int (optional)
+            The font size to take this letter gap to represent. Defaults to the previous font size in draw_one_letter or draw_string. 
+        letter_gap : float (optional) 
+            The letter gap scale factor. defaults to LetterDrawer.letter_gap (which defaults to -0.1) 
+        '''
+        if fontsize is None: 
+            assert ( not (self.prev_fontsize is None) ) , "Cannot draw letter gap before drawing letters!"
+            fontsize = self.prev_fontsize 
         if letter_gap is None: 
             letter_gap = LetterDrawer.letter_gap 
         #print("DRAWING LETTER GAP")
@@ -245,6 +262,7 @@ class LetterDrawer():
             If ``partial_fill`` is taking too long, consider increasing this value to make it run faster, at the cost of a lower resolution of fill.
             Default value is 10, and this should never be set below 5.
         """
+        self.prev_fontsize = fontsize 
         # this draws a multiline string, automatically drawing letter gaps as desired 
         # if fills is True, will fill the text with satin stitch. else, will draw the text outline 
 
