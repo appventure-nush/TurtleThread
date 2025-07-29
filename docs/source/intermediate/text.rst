@@ -138,6 +138,7 @@ code illustrates the three possibilities.
 
 
 - **Partial fill**
+  - IMPORTANT NOTE: Partial fill support was dropped at version 0.2.2. This option is no longer available. 
   - When using partial fill, it is recommended to also outline the text. This is because the partial fill will look extremely messy without the outline to go with it. 
   - Note that partial fill is still partially experimental, and might sometimes fill out of the boundaries of the character.
   - Partial fill requires dependencies found only in the full version of TurtleThread.
