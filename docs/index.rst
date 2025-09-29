@@ -31,7 +31,6 @@ introduction <https://turtlethread.com/en/intro/index.html>`_ by the original de
    source/intermediate/fills.rst
    source/intermediate/text.rst
    source/intermediate/color.rst
-   source/intermediate/svg.rst
    source/api/index.rst
    source/about_team.rst
 
