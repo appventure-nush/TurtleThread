@@ -515,7 +515,7 @@ def readPathAttrD(w_attr):
     curr_parse = ''
     was_e = False 
     for i in w_attr:
-        # print("now cmd:", i)
+        #print(i, end='')
         if i == ' ' or i == ',' or i=='\n' or i=='\t':
             if curr_parse != '': 
                 #print(float(curr_parse)) 
@@ -558,7 +558,7 @@ def reflect_point(cx, cy, px, py):
     return 2*cx - px, 2*cy - py
 
 
-def drawSVG(te:turtlethread.Turtle, filename, height, width=None, w_color=None, thickness=1, fill=True, outline=False, fill_min_y_dist:int=10, fill_min_x_dist=10, full_fill=True, outline_satin_thickness=None, flip_y_in:bool=False): # TODO consider colour 
+def drawSVG(te:turtlethread.Turtle, filename, height, width=None, w_color=None, thickness=1, fill=True, outline=False, fill_min_y_dist:int=10, fill_min_x_dist=10, full_fill=True, outline_satin_thickness=None, flip_y_in:bool=False, fill_angle="auto"): 
     """Function to draw an SVG file with a turtle. 
     
     Parameters 
@@ -583,6 +583,8 @@ def drawSVG(te:turtlethread.Turtle, filename, height, width=None, w_color=None, 
         The minimum distance between fill points in the y direction. Default is 10 (1mm).
     fill_min_x_dist : int, optional
         The minimum distance between fill points in the x direction. Default is 10 (1mm).
+    fill_angle : string/float, optional 
+        The angle to fill at, in radians. Default is "auto" 
 
     There are other possible keyword arguments, but they are actually ignored. 
     
@@ -795,7 +797,7 @@ def drawSVG(te:turtlethread.Turtle, filename, height, width=None, w_color=None, 
                     #print() 
                     
 
-                    fills.ScanlineFill("auto", True).fill(te, moved_pts) 
+                    fills.ScanlineFill(fill_angle, True).fill(te, moved_pts) 
 
         else: 
             debug = [] 
@@ -1049,7 +1051,7 @@ def drawSVG(te:turtlethread.Turtle, filename, height, width=None, w_color=None, 
 
 
 # for internal calculation purposes only, not to be used to actually draw SVG 
-def _fake_drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1, fill=True, outline=False, fill_min_y_dist:int=10, fill_min_x_dist=10, full_fill=True, flip_y_in:bool=False, w_attr=None): 
+def _fake_drawSVG(te:turtlethread.Turtle, filename, height, w_color=None, thickness=1, fill=False, outline=False, fill_min_y_dist:int=10, fill_min_x_dist=10, full_fill=True, flip_y_in:bool=False, w_attr=None): 
     global prev_ctrl 
     
     # draws an SVG file with the turtle 
