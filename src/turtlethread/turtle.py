@@ -522,18 +522,13 @@ class Turtle(TNavigator):
         bye : bool
             If True, then ``turtle.bye()`` will be called after drawing.
         """
-        try:
-            visualise_pattern(
-                self.pattern.to_pyembroidery(),
-                turtle=turtle, width=width, height=height, scale=scale, speed=speed, trace_jump=trace_jump, skip=skip, 
-                check_density=check_density, done=done, bye=bye
-            )
-        except Exception as e:
-            print(e)
-            # Errors when you close the window! Yikes
-            pass
-    
-    def fast_visualise(self, turtle=None, width=800, height=800, scale=1, speed=6, extra_speed=1, trace_jump=False, skip=False, check_density=True, done=True, bye=True):
+        visualise_pattern(
+            self.pattern.to_pyembroidery(),
+            turtle=turtle, width=width, height=height, scale=scale, speed=speed, trace_jump=trace_jump, skip=skip, 
+            check_density=check_density, done=done, bye=bye
+        )
+
+    def fast_visualise(self, turtle=None, width=800, height=800, scale=1, speed=6, extra_speed=1, trace_jump=False, skip=False, check_density=True, done=True, bye=True, annotate=True, setup_screen=True):
         """A fast version of the visualise() function, though it has undergone less testing.
 
         Parameters
@@ -563,17 +558,17 @@ class Turtle(TNavigator):
             If True, then ``turtle.done()`` will be called after drawing.
         bye : bool
             If True, then ``turtle.bye()`` will be called after drawing.
+        annotate: bool (default True) 
+            If True, will draw annotations like where it does tie stitches to jump. 
+        setup_screen: bool (default True) 
+            If True, will set up the turtle display screen 
         """
-        try:
-            fast_visualise(
-                self,
-                turtle=turtle, width=width, height=height, scale=scale, speed=speed, extra_speed=extra_speed, trace_jump=trace_jump, skip=skip, 
-                check_density=check_density, done=done, bye=bye
-            )
-        except Exception as e:
-            print(e)
-            # Errors when you close the window! Yikes
-            pass
+        
+        fast_visualise(
+            self,
+            turtle=turtle, width=width, height=height, scale=scale, speed=speed, extra_speed=extra_speed, trace_jump=trace_jump, skip=skip, 
+            check_density=check_density, done=done, bye=bye, annotate=annotate, setup_screen=setup_screen
+        )
 
     def show_info(self):
         """Display information about this turtle's embroidery pattern."""

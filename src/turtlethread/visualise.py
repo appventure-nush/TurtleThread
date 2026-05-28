@@ -87,6 +87,9 @@ def centered_line(turtle, length):
 
 
 def _finish_visualise(done, bye):
+    if (not done) and (not bye): 
+        return 
+
     import turtle  # Import turtle only here to avoid cluttering module namespace
 
     if done:
@@ -139,176 +142,181 @@ def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, spee
     # available.
     #
     # (This looks like it would conflict with the 'turtle' variable but it does not)
-    from turtle import Screen, Turtle
+    from turtle import Screen, Turtle, Terminator 
+    
+    try: 
 
-    if os.name == 'nt':
-        from ctypes import windll
-        windll.shcore.SetProcessDpiAwareness(2)
+        if os.name == 'nt':
+            from ctypes import windll
+            windll.shcore.SetProcessDpiAwareness(2)
 
-    if turtle is None:
-        # If turtle is None, grab the default turtle and set its speed to fastest
-        if Turtle._pen is None:
-            Turtle._pen = Turtle()
-        turtle = Turtle._pen
+        if turtle is None:
+            # If turtle is None, grab the default turtle and set its speed to fastest
+            if Turtle._pen is None:
+                Turtle._pen = Turtle()
+            turtle = Turtle._pen
 
-    turtle.speed(speed)
+        turtle.speed(speed)
 
-    if skip:
-        turtle._tracer(0)
+        if skip:
+            turtle._tracer(0)
 
-    screen = Screen()
-    screen.setup(width, height)
+        screen = Screen()
+        screen.setup(width, height)
 
-    canvas = screen.getcanvas()
-    root = canvas.master
+        canvas = screen.getcanvas()
+        root = canvas.master
 
-    # Draw grid
-    # Vertical thin
-    i = 0
-    while i < 1000:
-        canvas.create_line(i, -1000, i, 1000, width=2, fill="#eeeeee")
-        i += 100*scale
-    i = 0
-    while i > -1000:
-        canvas.create_line(i, -1000, i, 1000, width=2, fill="#eeeeee")
-        i -= 100 * scale
-    # Horizontal thin
-    i = 0
-    while i < 1000:
-        canvas.create_line(-1000, i, 1000, i, width=2, fill="#eeeeee")
-        i += 100 * scale
-    i = 0
-    while i > -1000:
-        canvas.create_line(-1000, i, 1000, i, width=2, fill="#eeeeee")
-        i -= 100 * scale
-    # Vertical thick
-    i = 0
-    while i < 1000:
-        canvas.create_line(i, -1000, i, 1000, width=5, fill="#cccccc")
-        i += 500 * scale
-    i = 0
-    while i > -1000:
-        canvas.create_line(i, -1000, i, 1000, width=5, fill="#cccccc")
-        i -= 500 * scale
-    # Horizontal thick
-    i = 0
-    while i < 1000:
-        canvas.create_line(-1000, i, 1000, i, width=5, fill="#cccccc")
-        i += 500 * scale
-    i = 0
-    while i > -1000:
-        canvas.create_line(-1000, i, 1000, i, width=5, fill="#cccccc")
-        i -= 500 * scale
+        # Draw grid
+        # Vertical thin
+        i = 0
+        while i < 1000:
+            canvas.create_line(i, -1000, i, 1000, width=2, fill="#eeeeee")
+            i += 100*scale
+        i = 0
+        while i > -1000:
+            canvas.create_line(i, -1000, i, 1000, width=2, fill="#eeeeee")
+            i -= 100 * scale
+        # Horizontal thin
+        i = 0
+        while i < 1000:
+            canvas.create_line(-1000, i, 1000, i, width=2, fill="#eeeeee")
+            i += 100 * scale
+        i = 0
+        while i > -1000:
+            canvas.create_line(-1000, i, 1000, i, width=2, fill="#eeeeee")
+            i -= 100 * scale
+        # Vertical thick
+        i = 0
+        while i < 1000:
+            canvas.create_line(i, -1000, i, 1000, width=5, fill="#cccccc")
+            i += 500 * scale
+        i = 0
+        while i > -1000:
+            canvas.create_line(i, -1000, i, 1000, width=5, fill="#cccccc")
+            i -= 500 * scale
+        # Horizontal thick
+        i = 0
+        while i < 1000:
+            canvas.create_line(-1000, i, 1000, i, width=5, fill="#cccccc")
+            i += 500 * scale
+        i = 0
+        while i > -1000:
+            canvas.create_line(-1000, i, 1000, i, width=5, fill="#cccccc")
+            i -= 500 * scale
 
-    # Write to window directly by getting tkinter object - a bit cursed
-    # There probably is a better way to do it
+        # Write to window directly by getting tkinter object - a bit cursed
+        # There probably is a better way to do it
 
-    # Calculate estimated pattern size
-    xy = [i / 100 for i in get_dimensions(pattern.stitches)]  # 100 units = 1cm
-    # Write pattern size
-    tk.Label(
-        root,
-        text=f"Width: {xy[0]:.2f} cm\nHeight: {xy[1]:.2f} cm",
-        justify=LEFT
-    ).pack(anchor="s", side="left")
-
-    # Count number of stitches
-    stitch_count = sum([1 if command == STITCH else 0 for *_, command in pattern.stitches])
-    # Estimate time assuming 600spm
-    time = stitch_count / 10
-    s = time % 60
-    m = time // 60 % 60
-    h = time // 3600
-    # Write stitch count
-    tk.Label(
-        root,
-        text=f"{stitch_count} stitches in total\n{f'{h}h' if h else ''}{f'{m}m' if m else ''}{s:.1f}s (assuming 600spm)",
-        justify=RIGHT
-    ).pack(anchor="s", side="right")
-    if check_density and density(pattern.stitches):
+        # Calculate estimated pattern size
+        xy = [i / 100 for i in get_dimensions(pattern.stitches)]  # 100 units = 1cm
+        # Write pattern size
         tk.Label(
             root,
-            text=f"WARNING: POTENTIAL HIGH STITCH DENSITY",
-            fg="#f00"
-        ).pack(side="bottom")
-    if len(pattern.stitches) == 0:
-        _finish_visualise(done=done, bye=bye)
-        return
+            text=f"Width: {xy[0]:.2f} cm\nHeight: {xy[1]:.2f} cm",
+            justify=LEFT
+        ).pack(anchor="s", side="left")
 
-    turtle.penup()
-    turtle.goto(pattern.stitches[0][0], pattern.stitches[0][1])
-    turtle.pendown()
+        # Count number of stitches
+        stitch_count = sum([1 if command == STITCH else 0 for *_, command in pattern.stitches])
+        # Estimate time assuming 600spm
+        time = stitch_count / 10
+        s = time % 60
+        m = time // 60 % 60
+        h = time // 3600
+        # Write stitch count
+        tk.Label(
+            root,
+            text=f"{stitch_count} stitches in total\n{f'{h}h' if h else ''}{f'{m}m' if m else ''}{s:.1f}s (assuming 600spm)",
+            justify=RIGHT
+        ).pack(anchor="s", side="right")
+        if check_density and density(pattern.stitches):
+            tk.Label(
+                root,
+                text=f"WARNING: POTENTIAL HIGH STITCH DENSITY",
+                fg="#f00"
+            ).pack(side="bottom")
+        if len(pattern.stitches) == 0:
+            _finish_visualise(done=done, bye=bye)
+            return
 
-    raise_error = False
-    threads = list(pattern.threadlist)
-    thread_idx = 0
-    progressbar = non_idle_tqdm
-    if skip:
-        print("Rendering... (show animation with skip=False)")
-        progressbar = no_tqdm
-    else:
-        print("Visualising... (skip with skip=True)")
-        if len(pattern.stitches) < 50:
+        turtle.penup()
+        turtle.goto(pattern.stitches[0][0], pattern.stitches[0][1])
+        turtle.pendown()
+
+        raise_error = False
+        threads = list(pattern.threadlist)
+        thread_idx = 0
+        progressbar = non_idle_tqdm
+        if skip:
+            print("Rendering... (show animation with skip=False)")
             progressbar = no_tqdm
-    for x, y, command in progressbar(pattern.stitches):
-        x = scale * x
-        y = scale * y
-        if command == JUMP:
-            # turtle.color("red")
-            turtle.color(0.8, 0.8, 0.8)
-            if not trace_jump: turtle.penup()
-            turtle.goto(x, -y)
-            turtle.pendown()
-
-            centered_dot(turtle, 10 * scale)
-        elif command == TRIM:
-            turtle.penup()
-            turtle.goto(x, -y)
-            turtle.pendown()
-
-            # turtle.color("black")
-            turtle.color(0.8, 0.8, 0.8)
-            centered_cross(turtle, 10 * scale)
-        elif command == STITCH:
-            turtle.setheading(turtle.towards(x, -y))
-            if len(threads) > 0:
-                turtle.color(threads[thread_idx].hex_color())
-            else:
-                turtle.color("blue")
-
-            #  20%  60%   20%
-            # blank line blank
-            # if stitch is long, limit blank part
-            xcur, ycur = turtle.position()
-            d = ((xcur - x) ** 2 + (ycur - (-y)) ** 2) ** 0.5  # maybe find a way to avoid fp errors here? prob unnecessary
-            blank = min(d/5, 2)
-            solid = d - 2*blank
-
-            w = turtle.width()
-            turtle.width(2)
-            turtle.penup()
-            turtle.forward(blank)
-            turtle.pendown()
-            turtle.forward(solid)
-            turtle.penup()
-            turtle.forward(blank)
-            turtle.pendown()
-            turtle.width(w)
-        elif command == COLOR_CHANGE:
-            thread_idx += 1
-
         else:
-            raise_error = True
-            break
+            print("Visualising... (skip with skip=True)")
+            if len(pattern.stitches) < 50:
+                progressbar = no_tqdm
+        for x, y, command in progressbar(pattern.stitches):
+            x = scale * x
+            y = scale * y
+            if command == JUMP:
+                # turtle.color("red")
+                turtle.color(0.8, 0.8, 0.8)
+                if not trace_jump: turtle.penup()
+                turtle.goto(x, -y)
+                turtle.pendown()
 
-    if skip:
-        turtle._update()
-        turtle._tracer(1)
+                centered_dot(turtle, 10 * scale)
+            elif command == TRIM:
+                turtle.penup()
+                turtle.goto(x, -y)
+                turtle.pendown()
 
-    _finish_visualise(done=done, bye=bye)
+                # turtle.color("black")
+                turtle.color(0.8, 0.8, 0.8)
+                centered_cross(turtle, 10 * scale)
+            elif command == STITCH:
+                turtle.setheading(turtle.towards(x, -y))
+                if len(threads) > 0:
+                    turtle.color(threads[thread_idx].hex_color())
+                else:
+                    turtle.color("blue")
 
-    if raise_error:
-        ValueError(f"Command not supported: {command}")
+                #  20%  60%   20%
+                # blank line blank
+                # if stitch is long, limit blank part
+                xcur, ycur = turtle.position()
+                d = ((xcur - x) ** 2 + (ycur - (-y)) ** 2) ** 0.5  # maybe find a way to avoid fp errors here? prob unnecessary
+                blank = min(d/5, 2)
+                solid = d - 2*blank
+
+                w = turtle.width()
+                turtle.width(2)
+                turtle.penup()
+                turtle.forward(blank)
+                turtle.pendown()
+                turtle.forward(solid)
+                turtle.penup()
+                turtle.forward(blank)
+                turtle.pendown()
+                turtle.width(w)
+            elif command == COLOR_CHANGE:
+                thread_idx += 1
+
+            else:
+                raise_error = True
+                break
+
+        if skip:
+            turtle._update()
+            turtle._tracer(1)
+
+        _finish_visualise(done=done, bye=bye)
+
+        if raise_error:
+            ValueError(f"Command not supported: {command}")
+
+    except Terminator: 
+        print("Window closed manually by user.")
 
 
 def density(stitches):
@@ -358,9 +366,9 @@ def density_from_points(pts, dist=0.5, num=20):
 
 
 
-from . import stitches 
+#from . import stitches 
 def fast_visualise(te, turtle=None, width=800, height=800, scale=1, speed=0, extra_speed=1, trace_jump=False, skip=False,
-                      check_density=True, done=True, bye=True):
+                      check_density=True, done=True, bye=True, annotate=True, setup_screen=True):
     """Use the builtin ``turtle`` library to visualise an embroidery pattern.
 
     Parameters
@@ -388,6 +396,10 @@ def fast_visualise(te, turtle=None, width=800, height=800, scale=1, speed=0, ext
         If True, then ``turtle.done()`` will be called after drawing.
     bye : bool
         If True, then ``turtle.bye()`` will be called after drawing.
+    annotate: bool (default True) 
+        If True, will draw annotations like where it does tie stitches to jump. 
+    setup_screen: bool (default True) 
+        If True, will set up the turtle display screen 
     """
     pattern = te.pattern.to_pyembroidery() 
     if USE_SPHINX_GALLERY:
@@ -398,98 +410,111 @@ def fast_visualise(te, turtle=None, width=800, height=800, scale=1, speed=0, ext
     # available.
     #
     # (This looks like it would conflict with the 'turtle' variable but it does not)
-    from turtle import Screen, Turtle
+    
 
     if os.name == 'nt':
         from ctypes import windll
         windll.shcore.SetProcessDpiAwareness(2)
 
-    if turtle is None:
+    if turtle is None: 
+        from turtle import Turtle 
         # If turtle is None, grab the default turtle and set its speed to fastest
         if Turtle._pen is None:
             Turtle._pen = Turtle()
         turtle = Turtle._pen
+        
+        if annotate or setup_screen: 
+            if skip:
+                print("Rendering... (show animation with skip=False)")
+            else:
+                print("Visualising... (skip with skip=True)")
 
     turtle.speed(speed)
 
     if skip:
         turtle._tracer(0)
+    
+    
+    if setup_screen: 
+        
+        from turtle import Screen
 
-    screen = Screen()
-    screen.setup(width, height)
+        screen = Screen()
+        screen.setup(width, height)
 
-    canvas = screen.getcanvas()
-    root = canvas.master
+        canvas = screen.getcanvas()
+        root = canvas.master
 
-    # Draw grid
-    # Vertical thin
-    i = 0
-    while i < 1000:
-        canvas.create_line(i, -1000, i, 1000, width=2, fill="#eeeeee")
-        i += 100*scale
-    i = 0
-    while i > -1000:
-        canvas.create_line(i, -1000, i, 1000, width=2, fill="#eeeeee")
-        i -= 100 * scale
-    # Horizontal thin
-    i = 0
-    while i < 1000:
-        canvas.create_line(-1000, i, 1000, i, width=2, fill="#eeeeee")
-        i += 100 * scale
-    i = 0
-    while i > -1000:
-        canvas.create_line(-1000, i, 1000, i, width=2, fill="#eeeeee")
-        i -= 100 * scale
-    # Vertical thick
-    i = 0
-    while i < 1000:
-        canvas.create_line(i, -1000, i, 1000, width=5, fill="#cccccc")
-        i += 500 * scale
-    i = 0
-    while i > -1000:
-        canvas.create_line(i, -1000, i, 1000, width=5, fill="#cccccc")
-        i -= 500 * scale
-    # Horizontal thick
-    i = 0
-    while i < 1000:
-        canvas.create_line(-1000, i, 1000, i, width=5, fill="#cccccc")
-        i += 500 * scale
-    i = 0
-    while i > -1000:
-        canvas.create_line(-1000, i, 1000, i, width=5, fill="#cccccc")
-        i -= 500 * scale
+        # Draw grid
+        # Vertical thin
+        i = 0
+        while i < 1000:
+            canvas.create_line(i, -1000, i, 1000, width=2, fill="#eeeeee")
+            i += 100*scale
+        i = 0
+        while i > -1000:
+            canvas.create_line(i, -1000, i, 1000, width=2, fill="#eeeeee")
+            i -= 100 * scale
+        # Horizontal thin
+        i = 0
+        while i < 1000:
+            canvas.create_line(-1000, i, 1000, i, width=2, fill="#eeeeee")
+            i += 100 * scale
+        i = 0
+        while i > -1000:
+            canvas.create_line(-1000, i, 1000, i, width=2, fill="#eeeeee")
+            i -= 100 * scale
+        # Vertical thick
+        i = 0
+        while i < 1000:
+            canvas.create_line(i, -1000, i, 1000, width=5, fill="#cccccc")
+            i += 500 * scale
+        i = 0
+        while i > -1000:
+            canvas.create_line(i, -1000, i, 1000, width=5, fill="#cccccc")
+            i -= 500 * scale
+        # Horizontal thick
+        i = 0
+        while i < 1000:
+            canvas.create_line(-1000, i, 1000, i, width=5, fill="#cccccc")
+            i += 500 * scale
+        i = 0
+        while i > -1000:
+            canvas.create_line(-1000, i, 1000, i, width=5, fill="#cccccc")
+            i -= 500 * scale
 
-    # Write to window directly by getting tkinter object - a bit cursed
-    # There probably is a better way to do it
+        # Write to window directly by getting tkinter object - a bit cursed
+        # There probably is a better way to do it
 
-    # Calculate estimated pattern size
-    xy = [i / 100 for i in get_dimensions(pattern.stitches)]  # 100 units = 1cm
-    # Write pattern size
-    tk.Label(
-        root,
-        text=f"Width: {xy[0]:.2f} cm\nHeight: {xy[1]:.2f} cm",
-        justify=LEFT
-    ).pack(anchor="s", side="left")
-
-    # Count number of stitches
-    stitch_count = sum([1 if command == STITCH else 0 for *_, command in pattern.stitches])
-    # Estimate time assuming 600spm
-    time = stitch_count / 10
-    s = time % 60
-    m = time // 60 % 60
-    h = time // 3600
-    # Write stitch count
-    tk.Label(
-        root,
-        text=f"{stitch_count} stitches in total\n{f'{h}h' if h else ''}{f'{m}m' if m else ''}{s:.1f}s (assuming 600spm)",
-        justify=RIGHT
-    ).pack(anchor="s", side="right")
-    if check_density and density(pattern.stitches):
+        # Calculate estimated pattern size
+        xy = [i / 100 for i in get_dimensions(pattern.stitches)]  # 100 units = 1cm
+        # Write pattern size
         tk.Label(
             root,
-            text=f"WARNING: POTENTIAL HIGH STITCH DENSITY",
-            fg="#f00"
-        ).pack(side="bottom")
+            text=f"Width: {xy[0]:.2f} cm\nHeight: {xy[1]:.2f} cm",
+            justify=LEFT
+        ).pack(anchor="s", side="left")
+
+        # Count number of stitches
+        stitch_count = sum([1 if command == STITCH else 0 for *_, command in pattern.stitches])
+        # Estimate time assuming 600spm
+        time = stitch_count / 10
+        s = time % 60
+        m = time // 60 % 60
+        h = time // 3600
+        # Write stitch count
+        tk.Label(
+            root,
+            text=f"{stitch_count} stitches in total\n{f'{h}h' if h else ''}{f'{m}m' if m else ''}{s:.1f}s (assuming 600spm)",
+            justify=RIGHT
+        ).pack(anchor="s", side="right")
+        if check_density and density(pattern.stitches):
+            tk.Label(
+                root,
+                text=f"WARNING: POTENTIAL HIGH STITCH DENSITY",
+                fg="#f00"
+            ).pack(side="bottom")
+    
     if len(pattern.stitches) == 0:
         _finish_visualise(done=done, bye=bye)
         return
@@ -501,46 +526,106 @@ def fast_visualise(te, turtle=None, width=800, height=800, scale=1, speed=0, ext
     raise_error = False
     threads = list(pattern.threadlist)
     thread_idx = 0
-    progressbar = non_idle_tqdm
-    if skip:
-        print("Rendering... (show animation with skip=False)")
-        progressbar = no_tqdm
-    else:
-        print("Visualising... (skip with skip=True)")
-        if len(pattern.stitches) < 50:
-            progressbar = no_tqdm
     
 
-    for i in range(len(te.pattern.stitch_groups)): 
-        #print(te.pattern.stitch_groups[i]._parent_stitch_group)
-        #speedup = isinstance(te.pattern.stitch_groups[i]._parent_stitch_group, stitches.DirectStitch) 
-        #speedup |= isinstance(te.pattern.stitch_groups[i]._parent_stitch_group, stitches.SatinStitch) 
-        speedup = te.pattern.stitch_groups[i].__class__.speedup 
-        if speedup: 
-            turtle._tracer(extra_speed+speedup)
-        else: 
-            turtle._tracer(extra_speed)
-        
-        #for x, y, command in progressbar(pattern.stitches):
-        for x, y, command in te.pattern.get_pyembroidery_of(i).stitches: 
+    if not skip: # look at speedup counts (but loses colour info )
+
+        for i in range(len(te.pattern.stitch_groups)): 
+            #print(te.pattern.stitch_groups[i]._parent_stitch_group)
+            #speedup = isinstance(te.pattern.stitch_groups[i]._parent_stitch_group, stitches.DirectStitch) 
+            #speedup |= isinstance(te.pattern.stitch_groups[i]._parent_stitch_group, stitches.SatinStitch) 
+            speedup = te.pattern.stitch_groups[i].__class__.speedup 
+            if speedup: 
+                turtle._tracer(extra_speed+speedup)
+            else: 
+                turtle._tracer(extra_speed)
+            
+            #for x, y, command in progressbar(pattern.stitches):
+            for x, y, command in te.pattern.get_pyembroidery_of(i).stitches: 
+                x = scale * x
+                y = scale * y
+                if command == JUMP:
+                    # turtle.color("red")
+                    if annotate: 
+                        turtle.color(0.8, 0.8, 0.8)
+                    if not trace_jump: turtle.penup()
+                    turtle.goto(x, -y)
+                    turtle.pendown()
+
+                    if annotate: 
+                        centered_dot(turtle, 10 * scale)
+                elif command == TRIM:
+                    turtle.penup()
+                    turtle.goto(x, -y)
+                    turtle.pendown()
+
+                    if annotate: 
+                        # turtle.color("black")
+                        turtle.color(0.8, 0.8, 0.8)
+                        centered_cross(turtle, 10 * scale)
+                elif command == STITCH:
+                    turtle.setheading(turtle.towards(x, -y))
+                    if len(threads) > 0:
+                        turtle.color(threads[thread_idx].hex_color())
+                    else:
+                        turtle.color("blue")
+
+
+                    
+                    if annotate: 
+                        xcur, ycur = turtle.position()
+                        d = ((xcur - x) ** 2 + (ycur - (-y)) ** 2) ** 0.5  # maybe find a way to avoid fp errors here? prob unnecessary
+                    
+                        #  20%  60%   20%
+                        # blank line blank
+                        # if stitch is long, limit blank part
+                        blank = min(d/5, 2)
+                        solid = d - 2*blank
+
+                        w = turtle.width()
+                        turtle.width(2)
+                        turtle.penup()
+                        turtle.forward(blank)
+                        turtle.pendown()
+                        turtle.forward(solid)
+                        turtle.penup()
+                        turtle.forward(blank)
+                        turtle.pendown()
+                        turtle.width(w)
+                    else: 
+                        turtle.pendown() 
+                        turtle.goto(x, -y)
+                        
+                elif command == COLOR_CHANGE:
+                    thread_idx += 1
+
+                else:
+                    raise_error = True
+                    break
+                
+    else: # can ignore speedup count and consider all (have colour)
+        for x, y, command in te.pattern.to_pyembroidery().stitches: 
             x = scale * x
             y = scale * y
             if command == JUMP:
                 # turtle.color("red")
-                turtle.color(0.8, 0.8, 0.8)
+                if annotate: 
+                    turtle.color(0.8, 0.8, 0.8)
                 if not trace_jump: turtle.penup()
                 turtle.goto(x, -y)
                 turtle.pendown()
 
-                centered_dot(turtle, 10 * scale)
+                if annotate: 
+                    centered_dot(turtle, 10 * scale)
             elif command == TRIM:
                 turtle.penup()
                 turtle.goto(x, -y)
                 turtle.pendown()
 
-                # turtle.color("black")
-                turtle.color(0.8, 0.8, 0.8)
-                centered_cross(turtle, 10 * scale)
+                if annotate: 
+                    # turtle.color("black")
+                    turtle.color(0.8, 0.8, 0.8)
+                    centered_cross(turtle, 10 * scale)
             elif command == STITCH:
                 turtle.setheading(turtle.towards(x, -y))
                 if len(threads) > 0:
@@ -548,24 +633,32 @@ def fast_visualise(te, turtle=None, width=800, height=800, scale=1, speed=0, ext
                 else:
                     turtle.color("blue")
 
-                #  20%  60%   20%
-                # blank line blank
-                # if stitch is long, limit blank part
-                xcur, ycur = turtle.position()
-                d = ((xcur - x) ** 2 + (ycur - (-y)) ** 2) ** 0.5  # maybe find a way to avoid fp errors here? prob unnecessary
-                blank = min(d/5, 2)
-                solid = d - 2*blank
 
-                w = turtle.width()
-                turtle.width(2)
-                turtle.penup()
-                turtle.forward(blank)
-                turtle.pendown()
-                turtle.forward(solid)
-                turtle.penup()
-                turtle.forward(blank)
-                turtle.pendown()
-                turtle.width(w)
+                
+                if annotate: 
+                    xcur, ycur = turtle.position()
+                    d = ((xcur - x) ** 2 + (ycur - (-y)) ** 2) ** 0.5  # maybe find a way to avoid fp errors here? prob unnecessary
+                
+                    #  20%  60%   20%
+                    # blank line blank
+                    # if stitch is long, limit blank part
+                    blank = min(d/5, 2)
+                    solid = d - 2*blank
+
+                    w = turtle.width()
+                    turtle.width(2)
+                    turtle.penup()
+                    turtle.forward(blank)
+                    turtle.pendown()
+                    turtle.forward(solid)
+                    turtle.penup()
+                    turtle.forward(blank)
+                    turtle.pendown()
+                    turtle.width(w)
+                else: 
+                    turtle.pendown() 
+                    turtle.goto(x, -y)
+                    
             elif command == COLOR_CHANGE:
                 thread_idx += 1
 

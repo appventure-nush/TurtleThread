@@ -10,6 +10,8 @@ The default or initial colour a turtle uses corresponds to the thread the machin
 
 To add a command for the turtle to switch to another color, use ``te.color("<color_name>")``
 
+Note that ``te.fast_visualise()`` with ``skip=False`` will fail to show colour changes. 
+
 
 Exporting color files
 =====================
