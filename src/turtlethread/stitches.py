@@ -4,7 +4,7 @@ import itertools
 import math
 from abc import ABC, abstractmethod
 from copy import copy
-from typing import Any, Generator, Iterable
+from typing import Any, Generator, Iterable, Optional 
 
 try:
     from typing import Literal, Self, TypeAlias
@@ -32,12 +32,12 @@ class EmbroideryPattern:
     """
 
     def __init__(self, scale: int = 1) -> None:
-        self.stitch_groups: list[StitchGroup | EmbroideryPattern] = []
+        self.stitch_groups: list[StitchGroup] = []
         self.scale = scale
 
     def to_pyembroidery(self) -> pyembroidery.EmbPattern:
         """Convert to a PyEmbroidery pattern."""
-        pattern = pyembroidery.EmbPattern()
+        pattern:pyembroidery.EmbPattern = pyembroidery.EmbPattern()
         for stitch_group in self.stitch_groups:
             if (not isinstance(stitch_group, JumpStitch)) and stitch_group.color is not None: 
                 change_col = True 
@@ -94,7 +94,7 @@ class StitchGroup(ABC):
         The initial position of the turtle.
     """
 
-    def __init__(self, start_pos: Vec2D, color: str) -> None:
+    def __init__(self, start_pos: Vec2D, color: Optional[str]) -> None:
         self._start_pos = start_pos
         self._positions = []
         self._stitch_commands = None
@@ -171,7 +171,7 @@ class UnitStitch(StitchGroup):
     def __init__(
         self, 
         start_pos: Vec2D, 
-        color:str, 
+        color: Optional[str], 
         stitch_length: int | float, 
         auto_adjust: bool = True, 
         enforce_end_stitch: bool = True, 
@@ -346,7 +346,7 @@ class RunningStitch(StitchGroup):
         Number of steps between each stitch.
     """
 
-    def __init__(self, start_pos: Vec2D, color:str, stitch_length: int | float) -> None:
+    def __init__(self, start_pos: Vec2D, color: Optional[str], stitch_length: int | float) -> None:
         super().__init__(start_pos=start_pos, color=color)
 
         self.stitch_length = stitch_length
@@ -440,7 +440,7 @@ class TripleStitch(StitchGroup):
         Number of steps between each stitch.
     """
 
-    def __init__(self, start_pos: Vec2D, color: str, stitch_length: float) -> None:
+    def __init__(self, start_pos: Vec2D, color: Optional[str], stitch_length: float) -> None:
         super().__init__(start_pos=start_pos, color=color)
         self.running_stitch = RunningStitch(start_pos=start_pos, stitch_length=stitch_length, color=color)
 
@@ -466,7 +466,7 @@ class JumpStitch(StitchGroup):
         make sense but it can happen dependent on how you generate your patterns.
     """
 
-    def __init__(self, start_pos: Vec2D, color:str=None, skip_intermediate_jumps: bool = True) -> None:
+    def __init__(self, start_pos: Vec2D, color: Optional[str]=None, skip_intermediate_jumps: bool = True) -> None:
         super().__init__(start_pos=start_pos, color=color) 
         self.skip_intermediate_jumps = skip_intermediate_jumps
 
@@ -489,7 +489,7 @@ class ZigzagStitch(UnitStitch):
     def __init__(
         self,
         start_pos: Vec2D,
-        color: str, 
+        color: Optional[str], 
         stitch_length: int | float,
         stitch_width: int | float,
         center: bool = False,
@@ -601,7 +601,7 @@ class SatinStitch(ZigzagStitch):
     We use 0.3mm for the density."""
     speedup=1
     
-    def __init__(self, start_pos: Vec2D, color: str, stitch_width: int | float, center: bool = True) -> None:
+    def __init__(self, start_pos: Vec2D, color: Optional[str], stitch_width: int | float, center: bool = True) -> None:
         super().__init__(start_pos=start_pos, color=color, stitch_width=stitch_width, stitch_length=3, center=center)
     
 
@@ -609,7 +609,7 @@ class CrossStitch(UnitStitch):
     def __init__(
         self,
         start_pos: Vec2D,
-        color: str, 
+        color: Optional[str], 
         stitch_length: int | float,
         stitch_width: int | float,
         center: bool = False,
@@ -691,7 +691,7 @@ class ZStitch(UnitStitch):
     def __init__(
         self,
         start_pos: Vec2D,
-        color: str, 
+        color: Optional[str], 
         stitch_length: int | float,
         stitch_width: int | float,
         center: bool = False,

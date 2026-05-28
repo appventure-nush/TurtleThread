@@ -11,6 +11,7 @@ from opentypesvg import fonts2svg
 
 from .draw_svg import drawSVG 
 
+from .text_simplex import SimplexLetterDrawer 
 
 
 # make it possible to at runtime process text 

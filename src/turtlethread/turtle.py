@@ -2,6 +2,7 @@ import math
 from contextlib import contextmanager
 from enum import Enum
 from warnings import warn
+from typing import Optional 
 
 from pyembroidery import write, STITCH
 
@@ -76,7 +77,7 @@ class Turtle(TNavigator):
 
     """
 
-    def __init__(self, pattern=None, scale=1, angle_mode="degrees", mode=TNavigator.DEFAULT_MODE, color=None):
+    def __init__(self, pattern=None, scale=1, angle_mode="degrees", mode=TNavigator.DEFAULT_MODE, color:Optional[str]=None):
         # TODO: Flag that can enable/disable changing angle when angle mode is changed
         if pattern is None:
             self.pattern = stitches.EmbroideryPattern(scale=scale)
@@ -289,12 +290,21 @@ class Turtle(TNavigator):
         ))
 
     def start_direct_stitch(self):
-        self.set_stitch_type(stitches.DirectStitch(self.pos()))
+        self.set_stitch_type(stitches.DirectStitch(self.pos(), self.curr_color))
     
     def start_fast_direct_stitch(self):
-        self.set_stitch_type(stitches.FastDirectStitch(self.pos()))
+        self.set_stitch_type(stitches.FastDirectStitch(self.pos(), self.curr_color))
 
-    def cleanup_stitch_type(self):
+    def cleanup_stitch_type(self, check_state_with=None):
+        if check_state_with is not None: 
+            if (self._stitch_group_stack[-1]._parent_stitch_group is not check_state_with) and (self._stitch_group_stack[-1] is not check_state_with):
+                raise RuntimeError(
+                    "Inconsistent state, likely caused by explicitly calling `cleanup_stitch_type` within a"
+                    + " stitch group context (e.g. within a `with turtle.running_stitch(20):` block)."
+                    + "\nYou should either set stitch groups with context managers or with the `start_{stitch_type}`"
+                    + " methods, not both."
+                )
+
         """Cleanup after switching stitch type."""
         if self.filling: 
             for command in self._stitch_group_stack[-1].get_stitch_commands():
@@ -324,15 +334,8 @@ class Turtle(TNavigator):
     def use_stitch_group(self, stitch_group):
         self.set_stitch_type(stitch_group=stitch_group)
         yield
-        if (self._stitch_group_stack[-1]._parent_stitch_group is not stitch_group) and (self._stitch_group_stack[-1] is not stitch_group):
-            raise RuntimeError(
-                "Inconsistent state, likely caused by explicitly calling `cleanup_stitch_type` within a"
-                + " stitch group context (e.g. within a `with turtle.running_stitch(20):` block)."
-                + "\nYou should either set stitch groups with context managers or with the `start_{stitch_type}`"
-                + " methods, not both."
-            )
 
-        self.cleanup_stitch_type()
+        self.cleanup_stitch_type(check_state_with=stitch_group)
 
     def running_stitch(self, stitch_length=30):
         """Set the stitch mode to running stitch and cleanup afterwards.
@@ -384,7 +387,7 @@ class Turtle(TNavigator):
         center: bool = False,
         auto_adjust: bool = True,
         enforce_end_stitch: bool = True,
-        enforce_start_stitch: bool = True) -> None:
+        enforce_start_stitch: bool = True):
         """Set the stitch mode to zigzag stitch.""" 
         
         return self.use_stitch_group(stitches.ZigzagStitch(
@@ -410,7 +413,7 @@ class Turtle(TNavigator):
         center: bool = False,
         auto_adjust: bool = True,
         enforce_end_stitch: bool = True,
-        enforce_start_stitch: bool = True) -> None:
+        enforce_start_stitch: bool = True):
         """Set the stitch mode to cross stitch.""" 
         
         return self.use_stitch_group(stitches.CrossStitch(
@@ -431,7 +434,7 @@ class Turtle(TNavigator):
         center: bool = False,
         auto_adjust: bool = True,
         enforce_end_stitch: bool = True,
-        enforce_start_stitch: bool = True) -> None:
+        enforce_start_stitch: bool = True):
         """Set the stitch mode to z stitch.""" 
         
         return self.use_stitch_group(stitches.ZStitch(
