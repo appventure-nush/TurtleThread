@@ -2,7 +2,7 @@ FROM python:3.12-alpine AS build
 
 WORKDIR /app 
 
-RUN apk add make python3-tkinter
+RUN apk add --no-cache make python3-tkinter gcc musl-dev cairo-dev
 
 COPY src/ ./src
 COPY requirements.txt .
