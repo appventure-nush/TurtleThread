@@ -2,6 +2,30 @@ Drawing Text
 ============
 
 
+Using SimplexLetterDrawer
+-------------------------
+.. versionadded:: 0.3.0
+
+This will draw letters using the "Simplex" font, which is fast, lightweight, and thin. 
+
+.. literalinclude:: text/eg_simplex.py
+    :language: python
+    :linenos:
+    :emphasize-lines: 6
+
+Its output should look like this: 
+
+.. image:: ../../_static/figures/text/draw_simplex_helloworld.png
+
+You can set initialize ``SimplexLetterDrawer(turtle, width, center, scale, newline_gap)```
+
+- ``width`` and ``center`` are satin stitch parameters (default 2.0 and True) 
+
+- ``scale`` decides how large it is (default 5.0)
+
+- ``newline_gap`` decides how far down to go when going to a new line (default 32.0) 
+
+
 Using the LetterDrawer
 ----------------------
 

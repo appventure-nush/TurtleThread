@@ -19,4 +19,4 @@ The three contributors from AppVenture are (by alphabetical order):
 
 * **Tan Junheng**, on improved visualisation of the embroidery process;
 * **Wong Yue Heng**, on implementing additional stitch types, fills, and updated documentation;
-* **Yu Simu**, on the implementation of drawing text and SVG vectors, and using colours.
+* **Yu Simu** (current maintainer), on the implementation of drawing text and SVG vectors, and using colours.
