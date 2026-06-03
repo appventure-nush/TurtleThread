@@ -610,40 +610,42 @@ class SimplexLetterDrawer: # this one doesn't have an idea of "lettergap" becaus
         nextpos = SimplexLetterDrawer.simplex[i][1] 
         
         
-        state=0 # -1 if nothing, 0 if jumping, 1 if satin 
-        if nverts > 0: 
-            self.turtle.start_jump_stitch() 
-        #last_stitchgroup = None 
-        #satin = SatinStitch(self.turtle.pos(), self.turtle.curr_color, width, center=center)
-        #self.set_stitch_type()
-        # TODO perhaps allow cleanup_stitch_type to check 
         
         startx, starty = self.turtle.pos() 
-        for pt in range(1,nverts+1): 
-            x = SimplexLetterDrawer.simplex[i][pt*2] 
-            y = SimplexLetterDrawer.simplex[i][1+pt*2] 
-            if (x==-1 and y==-1): 
-                if state==1: 
-                    # switch to jump 
-                    self.turtle.cleanup_stitch_type()
-                    #state = -1 
-                    #if state == -1
-                    self.turtle.start_jump_stitch() 
-                    state=0
-                if state==-1: 
-                    raise RuntimeError("DRAW SimplexLetterDrawer.simplex LETTER STARTED WITH PENUP? ERROR") 
-            else: 
-                if state == -1: 
-                    self.turtle.start_satin_stitch(width, center)
-                    state=1
-                self.turtle.goto(startx+x*scale, starty-y*scale) 
-                if state == 0: 
-                    self.turtle.cleanup_stitch_type()
-                    state = -1
-        
-        # end off with jump stitch to next location 
-        if state != -1: 
-            self.turtle.cleanup_stitch_type() 
+        if nverts > 0: 
+            self.turtle.start_jump_stitch() 
+            state=0 # -1 if nothing, 0 if jumping, 1 if satin 
+            #last_stitchgroup = None 
+            #satin = SatinStitch(self.turtle.pos(), self.turtle.curr_color, width, center=center)
+            #self.set_stitch_type()
+            # TODO perhaps allow cleanup_stitch_type to check 
+            
+            
+            for pt in range(1,nverts+1): 
+                x = SimplexLetterDrawer.simplex[i][pt*2] 
+                y = SimplexLetterDrawer.simplex[i][1+pt*2] 
+                if (x==-1 and y==-1): 
+                    if state==1: 
+                        # switch to jump 
+                        self.turtle.cleanup_stitch_type()
+                        #state = -1 
+                        #if state == -1
+                        self.turtle.start_jump_stitch() 
+                        state=0
+                    if state==-1: 
+                        raise RuntimeError("DRAW SimplexLetterDrawer.simplex LETTER STARTED WITH PENUP? ERROR") 
+                else: 
+                    if state == -1: 
+                        self.turtle.start_satin_stitch(width, center)
+                        state=1
+                    self.turtle.goto(startx+x*scale, starty-y*scale) 
+                    if state == 0: 
+                        self.turtle.cleanup_stitch_type()
+                        state = -1
+            
+            # end off with jump stitch to next location 
+            if state != -1: 
+                self.turtle.cleanup_stitch_type() 
 
         with self.turtle.jump_stitch(): 
             self.turtle.goto(startx+nextpos*scale, starty)
