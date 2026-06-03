@@ -103,6 +103,27 @@ def _finish_visualise(done, bye):
         except turtle.Terminator:
             pass
 
+def count_from_pattern(stitches): 
+    # stitches : pyembroidery.EmbPattern's .stitches object 
+    stitch_count = 0 
+    jump_count = 0 
+    for *_, command in stitches: 
+        if command == STITCH: 
+            stitch_count += 1 
+        elif command == JUMP: 
+            jump_count += 1 
+    return stitch_count, jump_count 
+
+def estimate_time(stitch_count, jump_count): 
+    
+    # Estimate time assuming 600spm, + 0.15s per jump 
+    time = stitch_count / 10 + 0.15 * jump_count 
+    
+    s = time % 60
+    m = time // 60 % 60
+    h = time // 3600
+    return s, m, h 
+
 
 def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, speed=6, trace_jump=False, skip=False,
                       check_density=True, done=True, bye=True):
@@ -218,16 +239,13 @@ def visualise_pattern(pattern, turtle=None, width=800, height=800, scale=1, spee
         ).pack(anchor="s", side="left")
 
         # Count number of stitches
-        stitch_count = sum([1 if command == STITCH else 0 for *_, command in pattern.stitches])
-        # Estimate time assuming 600spm
-        time = stitch_count / 10
-        s = time % 60
-        m = time // 60 % 60
-        h = time // 3600
+        stitch_count, jump_count = count_from_pattern(pattern.stitches)
+        
+        s, m, h = estimate_time(stitch_count, jump_count) 
         # Write stitch count
         tk.Label(
             root,
-            text=f"{stitch_count} stitches in total\n{f'{h}h' if h else ''}{f'{m}m' if m else ''}{s:.1f}s (assuming 600spm)",
+            text=f"{stitch_count} stitches in total\n{f'{h}h' if h else ''}{f'{m}m' if m else ''}{s:.1f}s (assuming 600spm, 0.15s/jump)",
             justify=RIGHT
         ).pack(anchor="s", side="right")
         if check_density and density(pattern.stitches):
@@ -496,16 +514,13 @@ def fast_visualise(te, turtle=None, width=800, height=800, scale=1, speed=0, ext
         ).pack(anchor="s", side="left")
 
         # Count number of stitches
-        stitch_count = sum([1 if command == STITCH else 0 for *_, command in pattern.stitches])
-        # Estimate time assuming 600spm
-        time = stitch_count / 10
-        s = time % 60
-        m = time // 60 % 60
-        h = time // 3600
+        stitch_count, jump_count = count_from_pattern(pattern.stitches)
+        
+        s, m, h = estimate_time(stitch_count, jump_count) 
         # Write stitch count
         tk.Label(
             root,
-            text=f"{stitch_count} stitches in total\n{f'{h}h' if h else ''}{f'{m}m' if m else ''}{s:.1f}s (assuming 600spm)",
+            text=f"{stitch_count} stitches in total\n{f'{h}h' if h else ''}{f'{m}m' if m else ''}{s:.1f}s (assuming 600spm, 0.15s/jump)",
             justify=RIGHT
         ).pack(anchor="s", side="right")
         if check_density and density(pattern.stitches):
