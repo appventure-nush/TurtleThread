@@ -21,20 +21,33 @@ Example usage:
     :emphasize-lines: 23, 24
 
 
-.. raw:: html
+.. if-builder:: html
+  .. raw:: html
 
-   <div style="display:flex; gap:40px; align-items:flex-start;">
+    <div style="display:flex; gap:40px; align-items:flex-start;">
 
-     <div style="display: grid; text-align:center; gap: 10px; ">
-       <div><strong>Before Fix</strong></div>
-       <img src="../../_static/figures/pathfixer/before_fix.png" width="300"/>
-     </div>
+      <div style="display: grid; text-align:center; gap: 10px; ">
+        <div><strong>Before Fix</strong></div>
+        <img src="../../_static/figures/pathfixer/before_fix.png" width="300"/>
+      </div>
 
-     <div style="display: grid; text-align:center; gap: 10px; ">
-       <div><strong>After Fix</strong></div>
-       <img src="../../_static/figures/pathfixer/after_fix.png" width="300"/>
-     </div>
+      <div style="display: grid; text-align:center; gap: 10px; ">
+        <div><strong>After Fix</strong></div>
+        <img src="../../_static/figures/pathfixer/after_fix.png" width="300"/>
+      </div>
 
-   </div>
+    </div>
+
+.. if-builder:: simplepdf 
+  
+  **Before Fix**
+
+   .. image:: ../../_static/figures/pathfixer/before_fix.png
+      :width: 300px
+
+   **After Fix**
+
+   .. image:: ../../_static/figures/pathfixer/after_fix.png
+      :width: 300px
 
 

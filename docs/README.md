@@ -15,6 +15,14 @@ The resultant HTML documentation should be in the `_build/html/` directory.
 
 On Windows, use `make.bat` instead.
 
+If you `apt install weasyprint`, `pip install sphinx-simplepdf`, you can run 
+
+```make simplepdf``` 
+
+(but somehow it's not working now oops)
+
+to make PDF documentation. 
+
 ## How do I add documentation? 
 
 Sphinx uses ReStructuredText (RST) instead of Markdown (which is probably more common?) due to its extensibility and
