@@ -17,13 +17,27 @@ Its output should look like this:
 
 .. image:: ../../_static/figures/text/draw_simplex_helloworld.png
 
-You can set initialize ``SimplexLetterDrawer(turtle, width, center, scale, newline_gap)```
+We can also set some other parameters: 
 
-- ``width`` and ``center`` are satin stitch parameters (default 2.0 and True) 
+.. literalinclude:: text/eg_simplex_bold.py
+    :language: python
+    :linenos:
+    :emphasize-lines: 6
+
+.. image:: ../../_static/figures/text/draw_simplex_bold_helloworld.png
+
+You can set initialize ``SimplexLetterDrawer(turtle, bold, scale, newline_gap, triple_stitch_length, center)```
+
+- if ``bold`` is ``False`` (default), uses triple stitch; else, uses satin stitch (default width 20; setting ``bold`` to a nonzero integer also sets this width). 
 
 - ``scale`` decides how large it is (default 5.0)
 
 - ``newline_gap`` decides how far down to go when going to a new line (default 32.0) 
+
+- ``triple_stitch_length`` is a parameter for triple stitch (default 30) 
+
+- ``center`` is satin stitch parameters (default True) 
+
 
 
 Using the LetterDrawer

@@ -5,14 +5,19 @@ from .stitches import SatinStitch, JumpStitch
 
 class SimplexLetterDrawer: # this one doesn't have an idea of "lettergap" because it's handled by the simplex font already 
     # this one also doesn't need context manager to clear font stuff anymore 
-    def __init__(self, turtle:Turtle, width=2, center=True, scale=5.0, newline_gap=32.0): 
+    def __init__(self, turtle:Turtle, bold=False, scale=5.0, newline_gap=32.0, triple_stitch_length=30, center=True, ): 
         # this can extend up to 25*scale units above and 7*scale units below 
         # rmbr that 100 units = 1 cm 
+        
         self.turtle = turtle 
-        self.width = width 
+        if isinstance(bold, bool): 
+            self.width = 20 * int(bold)
+        else: 
+            self.width = bold 
         self.center = center 
         self.scale = scale 
         self.newline_gap = newline_gap 
+        self.triple_stitch_length = triple_stitch_length
 
     simplex = [ # [95][112]
         [0,16, # Ascii 32 
@@ -587,22 +592,25 @@ class SimplexLetterDrawer: # this one doesn't have an idea of "lettergap" becaus
         -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,],
     ]
 
-    def draw_string(self, s, width=None, center=None, scale=None, newline_gap=None): 
+    def draw_string(self, s, width=None, center=None, scale=None, newline_gap=None, triple_stitch_length=None): 
         startx, starty = self.turtle.pos() 
         if newline_gap is None: 
             newline_gap = self.newline_gap
+        if triple_stitch_length is None: 
+            triple_stitch_length = self.triple_stitch_length
         for c in s: 
             if c == '\n': 
                 # goto next pos 
                 with self.turtle.jump_stitch(): 
                     self.turtle.goto(startx, starty + newline_gap*self.scale)
                 continue 
-            self.draw_letter(c, width, center, scale=None) 
+            self.draw_letter(c, width, center, scale=None, triple_stitch_length=triple_stitch_length) 
 
-    def draw_letter(self, c, width=None, center=None, scale=None):
+    def draw_letter(self, c, width=None, center=None, scale=None, triple_stitch_length=None):
         if width is None: width = self.width 
         if center is None: center = self.center  
         if scale is None: scale = self.scale 
+        if triple_stitch_length is None: triple_stitch_length = self.triple_stitch_length 
         
         i = ord(c)-32 
         if i >= 95: raise ValueError("Cannot draw character {} (ascii {})".format(c, i+32))
@@ -636,7 +644,10 @@ class SimplexLetterDrawer: # this one doesn't have an idea of "lettergap" becaus
                         raise RuntimeError("DRAW SimplexLetterDrawer.simplex LETTER STARTED WITH PENUP? ERROR") 
                 else: 
                     if state == -1: 
-                        self.turtle.start_satin_stitch(width, center)
+                        if width==0: 
+                            self.turtle.start_triple_stitch(triple_stitch_length)
+                        else: 
+                            self.turtle.start_satin_stitch(width, center)
                         state=1
                     self.turtle.goto(startx+x*scale, starty-y*scale) 
                     if state == 0: 
